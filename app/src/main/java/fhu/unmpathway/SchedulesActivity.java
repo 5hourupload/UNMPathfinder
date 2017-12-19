@@ -2,13 +2,10 @@ package fhu.unmpathway;
 
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.text.Layout;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -16,9 +13,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.LinearLayout;
 
-public class MainActivity extends AppCompatActivity
+public class SchedulesActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener
 {
 
@@ -26,7 +24,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_schedules);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -65,21 +63,21 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-
-        // Get the SearchView and set the searchable configuration
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) menu.findItem(R.id.menu_search).getActionView();
-        // Assumes current activity is the searchable activity
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu)
+//    {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.main, menu);
+//
+//        // Get the SearchView and set the searchable configuration
+//        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+//        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) menu.findItem(R.id.menu_search).getActionView();
+//        // Assumes current activity is the searchable activity
+//        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+//        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+//
+//        return true;
+//    }
 
 //    @Override
 //    public boolean onOptionsItemSelected(MenuItem item)
@@ -107,23 +105,15 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.standard)
         {
-
-            LinearLayout standard = findViewById(R.id.standard_layout);
-            standard.setVisibility(View.VISIBLE);
-            LinearLayout elevation = findViewById(R.id.elevation_layout);
-            elevation.setVisibility(View.INVISIBLE);
+            finish();
         }
         else if (id == R.id.elevation)
         {
-            LinearLayout standard = findViewById(R.id.standard_layout);
-            standard.setVisibility(View.INVISIBLE);
-            LinearLayout elevation = findViewById(R.id.elevation_layout);
-            elevation.setVisibility(View.VISIBLE);
+            finish();
         }
         else if (id == R.id.schedules)
         {
-            Intent intent = new Intent(this, SchedulesActivity.class);
-            startActivity(intent);
+
         }
 
 
