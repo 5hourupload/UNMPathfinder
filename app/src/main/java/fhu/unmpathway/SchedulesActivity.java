@@ -14,30 +14,60 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class SchedulesActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener
-{
+        implements NavigationView.OnNavigationItemSelectedListener {
+
+    ListView schedules;
+    ListView location;
+
+    String[] ListElements = new String[]{
+            "Android",
+            "PHP"
+    };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedules);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //I changed these to global variables just so you wouldnt have to re-declare them inside the FAB listener
+        schedules = (ListView) findViewById(R.id.schedulesListView);
+
+        location = (ListView) findViewById(R.id.location);
+
+
+        //I totally forgot that you have to use some adapters to add things to listviews
+        final List<String> ListElementsArrayList = new ArrayList<String>(Arrays.asList(ListElements));
+
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>
+                (getApplicationContext(), android.R.layout.simple_list_item_1, ListElementsArrayList);
+
+        schedules.setAdapter(adapter);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener()
-        {
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 //display schedules
 
-                Snackbar.make(view, "Replace with your own action(s)", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                //Add new schedule
+                ListElementsArrayList.add("New schedule");
+                adapter.notifyDataSetChanged();
+
+                //Maybe have an EditText pop up, prompting the user to give their schedule a name
+                //Or just call it "Schedule X"
+
+
             }
         });
 
@@ -50,21 +80,22 @@ public class SchedulesActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-//        ListView schedules;
-//        ListView classes;
-        ListView location = (ListView) findViewById(R.id.location);
+
+        //Now you want to add some kind of listener to when an entry in the schedules list view is selected
+        //When clicked, perhaps a new window pops up, and thats where you get to work on the locations listview
+
+        //Another thing worth learning about is SharedPreferences. When you restart the app, you lose all of your schedules.
+        //SharedPreferences allows you to store all of the schedules and pull them back up when the app is restarted
+
+
     }
 
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START))
-        {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        }
-        else
-        {
+        } else {
             super.onBackPressed();
         }
     }
@@ -104,21 +135,15 @@ public class SchedulesActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item)
-    {
+    public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.standard)
-        {
+        if (id == R.id.standard) {
             finish();
-        }
-        else if (id == R.id.elevation)
-        {
+        } else if (id == R.id.elevation) {
             finish();
-        }
-        else if (id == R.id.schedules)
-        {
+        } else if (id == R.id.schedules) {
 
         }
 

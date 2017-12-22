@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity
         System.out.println("xPer" + xPer);
 
 
-        Bitmap bitmap = bitmapRegionDecoder.decodeRegion(new Rect(width - (screenWidth* 4), height - ((int)screenHeight * 4), width, height),options);
+        Bitmap bitmap = bitmapRegionDecoder.decodeRegion(new Rect(width - (screenWidth* 2), height - ((int)screenHeight * 2), width, height),options);
 
         Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, screenWidth * 2, (int)screenHeight * 2, false);
         img = new TouchImageView(getApplicationContext(), minScale, 1);
