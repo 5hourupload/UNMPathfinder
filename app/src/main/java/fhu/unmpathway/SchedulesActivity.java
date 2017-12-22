@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 
 public class SchedulesActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener
@@ -27,13 +28,14 @@ public class SchedulesActivity extends AppCompatActivity
         setContentView(R.layout.activity_schedules);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
+                //display schedules
+
                 Snackbar.make(view, "Replace with your own action(s)", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -47,6 +49,10 @@ public class SchedulesActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+//        ListView schedules;
+//        ListView classes;
+        ListView location = (ListView) findViewById(R.id.location);
     }
 
     @Override
