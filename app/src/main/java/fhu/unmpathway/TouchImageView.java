@@ -187,7 +187,7 @@ public class TouchImageView extends ImageView
             public void run()
             {
                 threadActive = true;
-                while (System.currentTimeMillis() - lastUse < 1000)
+                while (System.currentTimeMillis() - lastUse < 2000)
                 {
 
                 }
@@ -225,57 +225,10 @@ public class TouchImageView extends ImageView
 
         return info;
     }
-    public float getOrigHeight()
-    {
-        float scale;
 
-        Drawable drawable = getDrawable();
-
-        if (drawable == null || drawable.getIntrinsicWidth() == 0 || drawable.getIntrinsicHeight() == 0)
-
-            return 69f;
-        int bmWidth = drawable.getIntrinsicWidth();
-
-        int bmHeight = drawable.getIntrinsicHeight();
-
-        Log.d("bmSize", "bmWidth: " + bmWidth + " bmHeight : " + bmHeight);
-
-        float scaleX = (float) viewWidth / (float) bmWidth;
-
-        float scaleY = (float) viewHeight / (float) bmHeight;
-
-        scale = Math.min(scaleX, scaleY);
-        float redundantYSpace = (float) viewHeight - (scale * (float) bmHeight);
-
-        redundantYSpace /= (float) 2;
-
-        origHeight = viewHeight - 2 * redundantYSpace;
-        return origHeight;
-    }
     private void setNewImage() throws IOException
     {
 
-        //System.out.println("here");
-//        Bitmap fullImage = BitmapFactory.decodeResource(getResources(),R.drawable.quad2);
-//        BitmapDrawable fullImage = (BitmapDrawable) getResources().getDrawable(R.drawable.clean_campus_map);
-        //Bitmap fullImageBitmap = fullImage.getBitmap();
-//        final BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inJustDecodeBounds = true;
-//        options.inSampleSize = 6;
-
-//        Bitmap fullImage = BitmapFactory.decodeResource(getResources(), R.drawable.clean_campus_map,options);
-//
-//        Bitmap resizedImage = Bitmap.createBitmap(fullImage, 0,0,500, 500);
-//        System.out.println(resizedImage.getHeight());
-
-//        Bitmap map = (
-//                decodeSampledBitmapFromResource(getResources(), R.drawable.quad2, 100, 100));
-//
-//        System.out.println(map.getWidth());
-        //img.setImageBitmap(map);
-
-        // Get image width and height:
-        //InputStream inputStream = context.getAssets().open("R.drawable.clean_campus_map.png");
         InputStream inputStream = getResources().openRawResource(+ R.drawable.clean_campus_map);
         BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
         tmpOptions.inJustDecodeBounds = true;

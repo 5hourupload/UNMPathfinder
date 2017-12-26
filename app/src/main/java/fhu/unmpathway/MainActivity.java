@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity
     static float fullScale = 0;
     static float xPer = 0;
     static float yPer = 0;
+    static float screenWidth;
     static float screenHeight;
     static boolean initialiazing = true;
 
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity
         final RelativeLayout mainLayout = findViewById(R.id.standard_layout);
 
 
-        InputStream inputStream = getResources().openRawResource(+R.drawable.clean_campus_map);
+        InputStream inputStream = getResources().openRawResource(+R.drawable.map50);
         BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
         tmpOptions.inJustDecodeBounds = true;
         BitmapFactory.decodeStream(inputStream, null, tmpOptions);
@@ -115,25 +116,26 @@ public class MainActivity extends AppCompatActivity
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.RGB_565;
-        int screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+        screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
         //getActualScreenHeight();
 
         xPer = ((float) width - ((float) screenWidth * 1.5f)) / fullOrigWidth;
-        yPer = ((float) height - (screenHeight * 1.5f)) / fullOrigHeight;
+        yPer = (height - screenHeight) / (height *2) ;
         System.out.println("xPer" + xPer);
+        System.out.println("yPer" + yPer);
 
+        Bitmap bitmap = bitmapRegionDecoder.decodeRegion(new Rect((int) ((double) width * .3), 0, width, height),options);
 
-        Bitmap bitmap = bitmapRegionDecoder.decodeRegion(new Rect(width - (screenWidth* 2), height - ((int)screenHeight * 2), width, height),options);
-
-        Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, screenWidth * 2, (int)screenHeight * 2, false);
+        //Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, screenWidth * 2, (int)screenHeight * 2, false);
         img = new TouchImageView(getApplicationContext(), minScale, 1);
-        img.setImageBitmap(scaledBitmap);
+        img.setImageBitmap(bitmap);
         img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mainLayout.addView(img);
         startListener();
+        fullScale = .5f;
 
-        getActualScreenHeight();
+        //getActualScreenHeight();
 
     }
     public static Bitmap createImage(int width, int height, int color) {
@@ -212,18 +214,53 @@ public class MainActivity extends AppCompatActivity
             public void run()
             {
                 float[] info = img.getImageInfo();
-                float scale = img.getScale();
+                float tempScale = img.getScale();
+
+                System.out.println("new scale" + fullScale);
+                float x0 = info[0];
+                float y0 = info[1];
+
+                System.out.println("xPer: " + xPer);
+                System.out.println("x0: " + x0);
+                System.out.println("yPer: " + yPer);
+                System.out.println("y0: " + y0);
+                xPer = xPer +  (x0-.25f) / fullScale;
+                yPer = yPer +  (y0-.25f) / fullScale ;
+                xPer = Math.max(xPer, 0);
+                yPer = Math.max(yPer, 0);
+                xPer = Math.min(xPer, 1);
+                yPer = Math.min(yPer, 1);
+
+                System.out.println(xPer);
+                System.out.println(yPer);
+
+                fullScale *= tempScale;
+                float mapScreenSizeWidth = (screenWidth / fullScale);
+                float mapScreenSizeHeight = (screenHeight / fullScale);
+
+                InputStream inputStream;
+
+                if (fullScale <= 0.5)
+                {
+                    inputStream = getResources().openRawResource(+R.drawable.map50);
+                    mapScreenSizeWidth/=2;
+                    mapScreenSizeHeight/=2;
+                }
+                else
+                {
+                    inputStream = getResources().openRawResource(+R.drawable.clean_campus_map);
+                }
+
+
 // Get image width and height:
                 //InputStream inputStream = context.getAssets().open("R.drawable.clean_campus_map.png");
-                InputStream inputStream = getResources().openRawResource(+R.drawable.clean_campus_map);
+
                 BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
                 tmpOptions.inJustDecodeBounds = true;
                 BitmapFactory.decodeStream(inputStream, null, tmpOptions);
                 int width = tmpOptions.outWidth;
                 int height = tmpOptions.outHeight;
 
-// Crop image:
-// Crop a rect with 200 pixel width and height from center of image
                 BitmapRegionDecoder bitmapRegionDecoder = null;
                 try
                 {
@@ -232,20 +269,25 @@ public class MainActivity extends AppCompatActivity
                 {
                     e.printStackTrace();
                 }
-                int x0 =(int)((float) width * info[0]);
-                int y0 =(int)((float) height * info[1]);
-                int x1 =(int)((float) width * info[2]);
-                int y1 =(int)((float) height * info[3]);
+
+                int left = (int) (xPer * (float) width);
+                int top = (int) (yPer * (float) height);
+                System.out.println("left: " + left);
+                System.out.println("top: " + top);
+
+
+
+
 
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.RGB_565;
-                Bitmap bitmap = bitmapRegionDecoder.decodeRegion(new Rect(x0, y0, x1, y1),options);
+                Bitmap bitmap = bitmapRegionDecoder.decodeRegion(new Rect(left - (int)(mapScreenSizeWidth/2), top - (int)(mapScreenSizeHeight/2), left + (int)(3*mapScreenSizeWidth/2), top + (int)(3*mapScreenSizeHeight/2)),options);
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, (int) screenWidth * 2, (int)screenHeight * 2, false);
                 //mImageView.setImageBitmap(bitmap);
-                System.out.println(bitmap.getHeight());
                 img.setImageBitmap(null);
-                img = new TouchImageView(getApplicationContext(), minScale, scale);
-                img.setImageBitmap(bitmap);
+                img = new TouchImageView(getApplicationContext(), minScale, 1);
+                img.setImageBitmap(scaledBitmap);
                 img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 RelativeLayout mainLayout = findViewById(R.id.standard_layout);
 
