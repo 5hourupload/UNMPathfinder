@@ -1,5 +1,6 @@
 package fhu.unmpathway;
 
+import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +12,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Base64;
@@ -28,8 +31,15 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 
 
 public class MainActivity extends AppCompatActivity
@@ -38,6 +48,9 @@ public class MainActivity extends AppCompatActivity
 
     TouchImageView img;
     static boolean newImageRequired = false;
+    static boolean focusRequired = false;
+    static float eventGetX = 0;
+    static float eventGetY = 0;
     float minScale;
     static float trueX = 0;
     static float trueY = 0;
@@ -49,6 +62,10 @@ public class MainActivity extends AppCompatActivity
     static float screenWidth;
     static float screenHeight;
     static boolean initialiazing = true;
+    Bitmap bitmap;
+
+    com.sothree.slidinguppanel.SlidingUpPanelLayout sliding;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -64,8 +81,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view)
             {
-                Snackbar.make(view, "Replace with your own action(s)", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action(s)", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                sliding.setElevation(500);
+                sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
             }
         });
 
@@ -91,17 +110,21 @@ public class MainActivity extends AppCompatActivity
 //        mainLayout.addView(img);
 
         final RelativeLayout mainLayout = findViewById(R.id.standard_layout);
+        sliding = findViewById(R.id.sliding_layout);
 
+        //sliding.setTouchEnabled(false);
 
+        //sliding.setPanelHeight(500);
         InputStream inputStream = getResources().openRawResource(+R.drawable.map50);
         BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
         tmpOptions.inJustDecodeBounds = true;
+        tmpOptions.inMutable = true;
         BitmapFactory.decodeStream(inputStream, null, tmpOptions);
 
         int width = tmpOptions.outWidth;
         int height = tmpOptions.outHeight;
-        fullOrigWidth = tmpOptions.outWidth;
-        fullOrigHeight = tmpOptions.outWidth;
+        //fullOrigWidth = tmpOptions.outWidth;
+        //fullOrigHeight = tmpOptions.outWidth;
 
 // Crop image:
 // Crop a rect with 200 pixel width and height from center of image
@@ -116,29 +139,120 @@ public class MainActivity extends AppCompatActivity
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.RGB_565;
+        options.inMutable = true;
         screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
         //getActualScreenHeight();
 
-        xPer = ((float) width - ((float) screenWidth * 1.5f)) / fullOrigWidth;
-        yPer = (height - screenHeight) / (height *2) ;
-        System.out.println("xPer" + xPer);
-        System.out.println("yPer" + yPer);
+        //xPer = ((float) width - ((float) screenWidth * 1.5f)) / fullOrigWidth;
+        //yPer = (height - screenHeight) / (height *2) ;
 
-        Bitmap bitmap = bitmapRegionDecoder.decodeRegion(new Rect((int) ((double) width * .3), 0, width, height),options);
-
+        bitmap = bitmapRegionDecoder.decodeRegion(new Rect((int) ((double) width * .3), 0, width, height), options);
+        bitmap = convertToMutable(this, bitmap);
         //Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, screenWidth * 2, (int)screenHeight * 2, false);
         img = new TouchImageView(getApplicationContext(), minScale, 1);
         img.setImageBitmap(bitmap);
-        img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        //img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mainLayout.addView(img);
+        //sliding.addView(img);
         startListener();
-        fullScale = .5f;
+        //fullScale = .5f;
 
-        //getActualScreenHeight();
-
+        sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
     }
-    public static Bitmap createImage(int width, int height, int color) {
+
+    /**
+     * Converts a immutable bitmap to a mutable bitmap. This operation doesn't allocates
+     * more memory that there is already allocated.
+     *
+     * @param imgIn - Source image. It will be released, and should not be used more
+     * @return a copy of imgIn, but muttable.
+     */
+    public static Bitmap convertToMutable1(Bitmap imgIn)
+    {
+        try
+        {
+            //this is the file going to use temporally to save the bytes.
+            // This file will not be a image, it will store the raw image data.
+            File file = new File(Environment.getExternalStorageDirectory() + File.separator + "temp.tmp");
+
+            //Open an RandomAccessFile
+            //Make sure you have added uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+            //into AndroidManifest.xml file
+            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+
+            // get the width and height of the source bitmap.
+            int width = imgIn.getWidth();
+            int height = imgIn.getHeight();
+            Bitmap.Config type = imgIn.getConfig();
+
+            //Copy the byte to the file
+            //Assume source bitmap loaded using options.inPreferredConfig = Config.ARGB_8888;
+            FileChannel channel = randomAccessFile.getChannel();
+            MappedByteBuffer map = channel.map(FileChannel.MapMode.READ_WRITE, 0, imgIn.getRowBytes() * height);
+            imgIn.copyPixelsToBuffer(map);
+            //recycle the source bitmap, this will be no longer used.
+            imgIn.recycle();
+            System.gc();// try to force the bytes from the imgIn to be released
+
+            //Create a new bitmap to load the bitmap again. Probably the memory will be available.
+            imgIn = Bitmap.createBitmap(width, height, type);
+            map.position(0);
+            //load it back from temporary
+            imgIn.copyPixelsFromBuffer(map);
+            //close the temporary file and channel , then delete that also
+            channel.close();
+            randomAccessFile.close();
+
+            // delete the temp file
+            file.delete();
+
+        } catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        return imgIn;
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    public static Bitmap convertToMutable(final Context context, final Bitmap imgIn)
+    {
+        final int width = imgIn.getWidth(), height = imgIn.getHeight();
+        final Bitmap.Config type = imgIn.getConfig();
+        File outputFile = null;
+        final File outputDir = context.getCacheDir();
+        try
+        {
+            outputFile = File.createTempFile(Long.toString(System.currentTimeMillis()), null, outputDir);
+            outputFile.deleteOnExit();
+            final RandomAccessFile randomAccessFile = new RandomAccessFile(outputFile, "rw");
+            final FileChannel channel = randomAccessFile.getChannel();
+            final MappedByteBuffer map = channel.map(FileChannel.MapMode.READ_WRITE, 0, imgIn.getRowBytes() * height);
+            imgIn.copyPixelsToBuffer(map);
+            imgIn.recycle();
+            final Bitmap result = Bitmap.createBitmap(width, height, type);
+            map.position(0);
+            result.copyPixelsFromBuffer(map);
+            channel.close();
+            randomAccessFile.close();
+            outputFile.delete();
+            return result;
+        } catch (final Exception e)
+        {
+        } finally
+        {
+            if (outputFile != null)
+                outputFile.delete();
+        }
+        return null;
+    }
+
+    public static Bitmap createImage(int width, int height, int color)
+    {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
@@ -146,6 +260,7 @@ public class MainActivity extends AppCompatActivity
         canvas.drawRect(0F, 0F, (float) width, (float) height, paint);
         return bitmap;
     }
+
     private void getActualScreenHeight()
     {
         final RelativeLayout mainLayout = findViewById(R.id.standard_layout);
@@ -157,8 +272,10 @@ public class MainActivity extends AppCompatActivity
 
         System.out.println("about");
         ViewTreeObserver vto = img.getViewTreeObserver();
-        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            public boolean onPreDraw() {
+        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener()
+        {
+            public boolean onPreDraw()
+            {
                 img.getViewTreeObserver().removeOnPreDrawListener(this);
                 screenHeight = img.getMeasuredHeight();
                 System.out.println("in tree" + screenHeight);
@@ -168,14 +285,18 @@ public class MainActivity extends AppCompatActivity
         });
 
     }
-    public int getStatusBarHeight() {
+
+    public int getStatusBarHeight()
+    {
         int result = 0;
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
+        if (resourceId > 0)
+        {
             result = getResources().getDimensionPixelSize(resourceId);
         }
         return result;
     }
+
     private void startListener()
     {
         Thread t = new Thread()
@@ -203,6 +324,67 @@ public class MainActivity extends AppCompatActivity
             }
         };
         t.start();
+        Thread t2 = new Thread()
+        {
+            public void run()
+            {
+                while (true)
+                {
+                    while (!focusRequired)
+                    {
+
+                    }
+                    System.out.println("focus");
+                    focusOnBuilding();
+                    focusRequired = false;
+                }
+            }
+        };
+        t2.start();
+    }
+
+    private void focusOnBuilding()
+    {
+
+        float[] info = img.getImageInfo();
+        float x = eventGetX / info[2] + info[0];
+        float y = eventGetY / info[2] + info[1];
+        System.out.println(x);
+        System.out.println(y);
+        highlightBuilding(x, y);
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                sliding.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);                //sliding.setElevation(500);
+
+            }
+        });
+    }
+
+    private void highlightBuilding(float x, float y)
+    {
+        final float x0 = x;
+        final float y0 = y;
+
+
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                //Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+
+                Canvas canvas = new Canvas(bitmap);
+                Paint paint = new Paint();
+                paint.setColor(Color.BLUE);
+                canvas.drawRect(x0, y0, x0 + 100, y0 + 100, paint);
+                //bitmap = mutableBitmap;
+                img.setImageBitmap(bitmap);
+            }
+
+        });
     }
 
     public void newImage() throws IOException
@@ -224,8 +406,8 @@ public class MainActivity extends AppCompatActivity
                 System.out.println("x0: " + x0);
                 System.out.println("yPer: " + yPer);
                 System.out.println("y0: " + y0);
-                xPer = xPer +  (x0-.25f) / fullScale;
-                yPer = yPer +  (y0-.25f) / fullScale ;
+                xPer = xPer + (x0 - .25f) / fullScale;
+                yPer = yPer + (y0 - .25f) / fullScale;
                 xPer = Math.max(xPer, 0);
                 yPer = Math.max(yPer, 0);
                 xPer = Math.min(xPer, 1);
@@ -243,8 +425,8 @@ public class MainActivity extends AppCompatActivity
                 if (fullScale <= 0.5)
                 {
                     inputStream = getResources().openRawResource(+R.drawable.map50);
-                    mapScreenSizeWidth/=2;
-                    mapScreenSizeHeight/=2;
+                    mapScreenSizeWidth /= 2;
+                    mapScreenSizeHeight /= 2;
                 }
                 else
                 {
@@ -276,14 +458,10 @@ public class MainActivity extends AppCompatActivity
                 System.out.println("top: " + top);
 
 
-
-
-
-
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.RGB_565;
-                Bitmap bitmap = bitmapRegionDecoder.decodeRegion(new Rect(left - (int)(mapScreenSizeWidth/2), top - (int)(mapScreenSizeHeight/2), left + (int)(3*mapScreenSizeWidth/2), top + (int)(3*mapScreenSizeHeight/2)),options);
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, (int) screenWidth * 2, (int)screenHeight * 2, false);
+                Bitmap bitmap = bitmapRegionDecoder.decodeRegion(new Rect(left - (int) (mapScreenSizeWidth / 2), top - (int) (mapScreenSizeHeight / 2), left + (int) (3 * mapScreenSizeWidth / 2), top + (int) (3 * mapScreenSizeHeight / 2)), options);
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, (int) screenWidth * 2, (int) screenHeight * 2, false);
                 //mImageView.setImageBitmap(bitmap);
                 img.setImageBitmap(null);
                 img = new TouchImageView(getApplicationContext(), minScale, 1);
@@ -298,7 +476,6 @@ public class MainActivity extends AppCompatActivity
 
 
     }
-
 
     @Override
     public void onBackPressed()
@@ -330,22 +507,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item)
-//    {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings)
-//        {
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override

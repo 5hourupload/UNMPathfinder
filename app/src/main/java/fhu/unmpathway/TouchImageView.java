@@ -22,6 +22,9 @@ import android.widget.ImageView;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static fhu.unmpathway.MainActivity.eventGetX;
+import static fhu.unmpathway.MainActivity.eventGetY;
+import static fhu.unmpathway.MainActivity.focusRequired;
 import static fhu.unmpathway.MainActivity.trueX;
 
 public class TouchImageView extends ImageView
@@ -39,7 +42,7 @@ public class TouchImageView extends ImageView
     PointF start = new PointF();
     //    float minScale = 1f;
 //    float maxScale = 3f;
-    float minScale =-50f;
+    float minScale = -50f;
     float maxScale = 50f;
     float[] m;
     int viewWidth, viewHeight;
@@ -51,6 +54,7 @@ public class TouchImageView extends ImageView
     protected float origWidth, origHeight;
 
     int oldMeasuredWidth, oldMeasuredHeight;
+    boolean movement = false;
 
     ScaleGestureDetector mScaleDetector;
 
@@ -98,7 +102,7 @@ public class TouchImageView extends ImageView
             public boolean onTouch(View v, MotionEvent event)
             {
 
-                System.out.println(saveScale);
+                //System.out.println(saveScale);
 
                 mScaleDetector.onTouchEvent(event);
 
@@ -108,6 +112,7 @@ public class TouchImageView extends ImageView
                 {
 
                     case MotionEvent.ACTION_DOWN:
+                        movement = false;
 
                         last.set(curr);
 
@@ -134,12 +139,20 @@ public class TouchImageView extends ImageView
                             fixTrans();
 
                             last.set(curr.x, curr.y);
+                            movement = true;
                         }
                         break;
 
                     case MotionEvent.ACTION_UP:
 
                         mode = NONE;
+
+                        if(!movement)
+                        {
+                            focusRequired = true;
+                            eventGetX = event.getX();
+                            eventGetY = event.getY();
+                        }
 
                         int xDiff = (int) Math.abs(curr.x - start.x);
 
@@ -148,6 +161,7 @@ public class TouchImageView extends ImageView
                         if (xDiff < CLICK && yDiff < CLICK)
 
                             performClick();
+
 
                         break;
 
@@ -158,6 +172,7 @@ public class TouchImageView extends ImageView
                         break;
 
                 }
+
 
                 setImageMatrix(matrix);
 
@@ -176,6 +191,7 @@ public class TouchImageView extends ImageView
 
     }
 
+    //DONT DELETE CAUSE I NEED TO PUT DIS IN WAC
     private void newImage()
     {
         if (threadActive)
@@ -207,48 +223,41 @@ public class TouchImageView extends ImageView
 
 
     }
+
     public float[] getImageInfo()
     {
         matrix.getValues(m);
         float transX = m[Matrix.MTRANS_X];
         float transY = m[Matrix.MTRANS_Y];
-        float[] info = new float[4];
+        float[] info = new float[3];
 
 
-        info[0] = (-transX / saveScale) / origWidth;
-        info[1] = (-transY / saveScale) / origHeight;
-        info[2] = ((-transX + this.getWidth())  / saveScale) / origWidth;
-        info[3] = ((-transY + this.getHeight()) / saveScale) / origHeight;
-        //float wholeScale = origWidth/MainActivity.trueOrigWidth;
-        MainActivity.trueX += (-transX / saveScale)+MainActivity.trueX;
-        MainActivity.trueY += (-transY / saveScale) + MainActivity.trueY;
+        info[0] = -transX;
+        info[1] = -transY;
+        info[2] = saveScale;
 
         return info;
     }
+//    public float[] getImageInfo()
+//    {
+//        matrix.getValues(m);
+//        float transX = m[Matrix.MTRANS_X];
+//        float transY = m[Matrix.MTRANS_Y];
+//        float[] info = new float[4];
+//
+//
+//        info[0] = (-transX / saveScale) / origWidth;
+//        info[1] = (-transY / saveScale) / origHeight;
+//        info[2] = ((-transX + this.getWidth()) / saveScale) / origWidth;
+//        info[3] = ((-transY + this.getHeight()) / saveScale) / origHeight;
+//        float wholeScale = origWidth/MainActivity.trueOrigWidth;
+//        MainActivity.trueX += (-transX / saveScale) + MainActivity.trueX;
+//        MainActivity.trueY += (-transY / saveScale) + MainActivity.trueY;
+//
+//        return info;
+//    }
 
-    private void setNewImage() throws IOException
-    {
 
-        InputStream inputStream = getResources().openRawResource(+ R.drawable.clean_campus_map);
-        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
-        tmpOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(inputStream, null, tmpOptions);
-        int width = tmpOptions.outWidth;
-        int height = tmpOptions.outHeight;
-
-// Crop image:
-// Crop a rect with 200 pixel width and height from center of image
-        BitmapRegionDecoder bitmapRegionDecoder = BitmapRegionDecoder.newInstance(inputStream, false);
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
-        Bitmap bitmap = bitmapRegionDecoder.decodeRegion(new Rect(width / 2 - 100, height / 2 - 100, width / 2 + 100, height / 2 + 100), options);
-        //mImageView.setImageBitmap(bitmap);
-
-
-
-        //this.setImageBitmap(bitmap);
-
-    }
 
     public void setMaxZoom(float x)
     {
@@ -268,6 +277,7 @@ public class TouchImageView extends ImageView
     {
         return saveScale;
     }
+
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener
     {
 

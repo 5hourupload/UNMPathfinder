@@ -18,12 +18,21 @@
 
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
+			<meta-data android:name="android.app.default_searchable"
+				android:value=".SearchableActivity" />
 		</activity>
 		<activity
 			android:name=".SchedulesActivity"
 			android:label="@string/schedule_window"
 			android:theme="@style/AppTheme.NoActionBar">
 
+		</activity>
+		<activity android:name=".SearchableActivity" >
+			<intent-filter>
+				<action android:name="android.intent.action.SEARCH" />
+			</intent-filter>
+			<meta-data android:name="android.app.searchable"
+				android:resource="@xml/searchable"/>
 		</activity>
 	</application>
 
