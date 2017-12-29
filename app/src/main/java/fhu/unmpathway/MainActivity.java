@@ -73,6 +73,19 @@ public class MainActivity extends AppCompatActivity
     ListView searchListView;
     ArrayList<String> searchArray;
     ArrayAdapter<String> adapter;
+    float botRightX = 2927;
+    float botRightY = 2495;
+    //@35.0811093,-106.6134433
+    float botRightXCoord = 35.0811093f;
+    float botRightYCoord = -106.6134433f;
+    float topLeftX = 479;
+    float topLeftY = 165;
+    //@35.0900785,-106.6248843
+    float topLeftXCoord = 35.0900785f;
+    float topLeftYCoord = -106.6248843f;
+
+
+
 
 
     com.sothree.slidinguppanel.SlidingUpPanelLayout sliding;
@@ -97,13 +110,6 @@ public class MainActivity extends AppCompatActivity
                 //sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                 img.matrix.postScale(3f, 3f);
                 img.setImageMatrix(img.matrix);
-                runOnUiThread(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                    }
-                });
             }
         });
 
@@ -116,66 +122,18 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-//        Bitmap map = (
-//                decodeSampledBitmapFromResource(getResources(), R.drawable.clean_campus_map, 100, 100));
-//        int mapHeight = map.getHeight();
-//        int screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
-        //minScale = screenHeight / mapHeight;
-//        img = new TouchImageView(this, minScale, 1);
-//
-//        img.setImageBitmap(map);
-//        img.setMaxZoom(50f);
-//        img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-//        mainLayout.addView(img);
 
         final RelativeLayout mainLayout = findViewById(R.id.standard_layout);
         sliding = findViewById(R.id.sliding_layout);
 
-        //sliding.setTouchEnabled(false);
-
-        //sliding.setPanelHeight(500);
-//        InputStream inputStream = getResources().openRawResource(+R.drawable.map50);
-//        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
-//        tmpOptions.inJustDecodeBounds = true;
-//        tmpOptions.inMutable = true;
-//        BitmapFactory.decodeStream(inputStream, null, tmpOptions);
-//
-//        int width = tmpOptions.outWidth;
-//        int height = tmpOptions.outHeight;
-//        fullOrigWidth = tmpOptions.outWidth;
-//        fullOrigHeight = tmpOptions.outWidth;
-
-// Crop image:
-// Crop a rect with 200 pixel width and height from center of image
-//        BitmapRegionDecoder bitmapRegionDecoder = null;
-//        try
-//        {
-//            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(inputStream, false);
-//        } catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
-//
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inPreferredConfig = Bitmap.Config.RGB_565;
-//        options.inMutable = true;
         screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
-        //getActualScreenHeight();
-resetBitmap();
-        //xPer = ((float) width - ((float) screenWidth * 1.5f)) / fullOrigWidth;
-        //yPer = (height - screenHeight) / (height *2) ;
-
-//        bitmap = bitmapRegionDecoder.decodeRegion(new Rect((int) ((double) width * .3), 0, width, height), options);
-        //bitmap = convertToMutable(this, bitmap);
-        //Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, screenWidth * 2, (int)screenHeight * 2, false);
+        resetBitmap();
         img = new TouchImageView(getApplicationContext(), minScale, 1);
         img.setImageBitmap(bitmap);
         //img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mainLayout.addView(img);
-        //sliding.addView(img);
         startListener();
-        //fullScale = .5f;
 
         sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
 
@@ -226,7 +184,39 @@ resetBitmap();
 
     private void resetBitmap()
     {
-        InputStream inputStream = getResources().openRawResource(+R.drawable.map50);
+        InputStream inputStream = getResources().openRawResource(+R.drawable.map50_cropped_main);
+        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
+        tmpOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(inputStream, null, tmpOptions);
+
+        int width = tmpOptions.outWidth;
+        int height = tmpOptions.outHeight;
+        System.out.println(height);
+        System.out.println("+++++++++++++++++++++++");
+        BitmapRegionDecoder bitmapRegionDecoder = null;
+        try
+        {
+            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(inputStream, false);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+
+        bitmap = bitmapRegionDecoder.decodeRegion(new Rect(0, 0, width, height), options);
+        bitmap = convertToMutable(this, bitmap);
+    }
+
+    private void setBitmap()
+    {
+
+//        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
+//        tmpOptions.inJustDecodeBounds = false;
+//        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.map50_cropped_main, tmpOptions);
+
+        InputStream inputStream = getResources().openRawResource(+R.drawable.map50_cropped_main);
         BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
         tmpOptions.inJustDecodeBounds = true;
         BitmapFactory.decodeStream(inputStream, null, tmpOptions);
@@ -244,10 +234,8 @@ resetBitmap();
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.RGB_565;
-        //screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
-        //screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
 
-        bitmap = bitmapRegionDecoder.decodeRegion(new Rect((int) ((double) width * .3), 0, width, height), options);
+        bitmap = bitmapRegionDecoder.decodeRegion(new Rect(0, 0, width, height), options);
         bitmap = convertToMutable(this, bitmap);
     }
 
@@ -341,6 +329,18 @@ resetBitmap();
         float y = eventGetY / info[2] + info[1];
         System.out.println(x);
         System.out.println(y);
+        float xCoordDiff = Math.abs((botRightXCoord - topLeftXCoord) / (botRightX - topLeftX));
+        float yCoordDiff = Math.abs((botRightYCoord - topLeftYCoord)/ (botRightY - topLeftY));
+        System.out.println(yCoordDiff);
+        System.out.println(xCoordDiff);
+        float xCoord =  topLeftXCoord - ((x - topLeftX) * xCoordDiff);
+        float yCoord =  topLeftYCoord + ((y - topLeftY) * yCoordDiff);
+        System.out.printf("%.9f",xCoord);
+        System.out.println(" ");
+        System.out.printf("%.9f",yCoord);
+        System.out.println("");
+
+
         if (!currentlyFocused)
         {
             highlightBuilding(x, y);
