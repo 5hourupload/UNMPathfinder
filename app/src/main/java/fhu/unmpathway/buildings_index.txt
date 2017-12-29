@@ -1,0 +1,101 @@
+ENGINEERING AND SCIENCE COMPUTER POD (ESCP)………………………………………………………J-16 @35.0825912,-106.6244135
+ART ANNEX (ARTX)……………………………………………………………………………………………… J-17 @35.0814166,-106.6269229
+ELIZABETH WATERS CENTER FOR DANCE AT CARLISLE GYMNASIUM (CARL)…………………...… K-16 
+CENTENNIAL ENGINEERING CENTER (CENT)…………………………………………………………………J-16
+BANDELIER HALL EAST (BANDE)………………………………………………………………………………J-15 
+COMMUNICATION AND JOURNALISM (COMMJ)…………………………………………………………… K-17
+MARRON HALL (MARN)………………………………………………………………………………………… K-17 
+FORD UTILITIES CENTER…………………………………………………………………………………………J-15
+SCHOLES HALL (SCHL)……………………………………………………………………………………………K-14 
+FARRIS ENGINEERING CENTER (FEC)…………………………………………………………………………J-17
+ANTHROPOLOGY (ANTHO)………………………………………………………………………………………J-14 
+MECHANICAL ENGINEERING (MECH)…………………………………………………………………………I-17
+ANTHROPOLOGY ANNEX (ANTHX)…………………………………………………………………………… J-16 
+MATTOX SCULPTURE CENTER (MATTOX)……………………………………………………………………H-17
+SCIENCE & MATHEMATICS LEARNING CENTER (SMLC)……………………………………………………J-15 
+HIBBEN CENTER FOR ARCHAEOLOGY RESEARCH (HIBB)…………………………………………………J-15 
+HIGH PERFORMANCE COMPUTING / ART, RESEARCH, TECH & SCI LAB…………………………………H-17
+BANDELIER HALL WEST (BANDW)…………………………………………………………………………… J-15 
+HUBER HOUSE………………………………………………………………………………………………………P-14
+BIOLOGY ANNEX (BIOANX)………………………………………………………………………………………K-16 
+YALE PARKING STRUCTURE ……………………………………………………………………………………L-13
+INTERNAL AUDIT………………………………………………………………………………………………… K-14 
+UNM INFORMATION ASSURANCE PROGRAMS……………………………………………………………… M-13
+608 BUENA VISTA DR. N.E. ………………………………………………………………………………………K-14 
+INSTITUTE FOR SOCIAL RESEARCH (ISR)………………………………………………………………………L-13
+CASTETTER HALL (CAST)…………………………………………………………………………………………K-17 
+NAVAL SCIENCE (NAVAL)……………………………………………………………………………………… L-13
+CLARK HALL (CLARK)……………………………………………………………………………………………K-15 
+JONSON GALLERY/RWJF (JONGAL)……………………………………………………………………………L-13
+MITCHELL HALL (MITCH)……………………………………………………………………………………… K-15 
+INFORMATION TECHNOLOGIES BUILDING (ITB)……………………………………………………………P-13
+NORTHROP HALL (NTHP)…………………………………………………………………………………………K-16 
+CORONADO HALL (DORMITORY)……………………………………………………………………………… P-16
+ALUMNI MEMORIAL CHAPEL (ALUMNI)………………………………………………………………………J-15 
+ONATE HALL (ONATE)……………………………………………………………………………………………Q-15
+UNM PRESS & OFFICE OF RESEARCH ………………………………………………………………………… J-14 
+ALVARADO HALL (DORMITORY) (ALVRDO)…………………………………………………………………P-15
+DISPUTE RESOLUTION (DISP)……………………………………………………………………………………K-14 
+ROBERT HARTUNG BUILDING (HART)…………………………………………………………………………N-18
+LOGAN HALL (LOGAN)……………………………………………………………………………………………J-17 
+AEROSPACE STUDIES BUILDING (AERO)………………………………………………………………………I-12
+REGENER HALL (REGH)………………………………………………………………………………………… J-16 
+UNIVERSITY CLUB (UCLUB)…………………………………………………………………………………… M-13
+EQUAL OPPORTUNITY PROGRAMS (EOP)…………………………………………………………………… J-14 
+TAMARIND INSTITUTE……………………………………………………………………………………………N-18
+THE WHITE HOUSE…………………………………………………………………………………………………J-13 
+LATIN AMERICAN/IBERIAN INSTITUTE (LAII)……………………………………………………………… L-13
+ELECTRICAL AND COMPUTER ENGINEERING/CENTENNIAL LIBRARY (EECE)…………………………J-16 
+BUREAU OF BUSINESS AND ECONOMIC RESEARCH DATA BANK (DATA)………………………………M-13
+DANE SMITH HALL (DSH)…………………………………………………………………………………………K-14 
+SOUTHWEST HISPANIC RESEARCH INSTITUTE AND CHICANO STUDIES (SHRI)………………………K-12
+UNIVERSITY HOUSE (UNIVH)……………………………………………………………………………………L-14 
+LOMAS PARKING STRUCTURE……………………………………………………………………………………O-13
+ZIMMERMAN LIBRARY (ZIMM)…………………………………………………………………………………L-15 
+ARMY ROTC (ARMY)………………………………………………………………………………………………K-12
+COLLABORATIVE TEACHING AND LEARNING BUILDING …………………………………………………M-14 
+UNM RESIDENT THEATRE GROUP (TRICKLOCK)……………………………………………………………J-12
+MESA VISTA HALL (MVH)…………………………………………………………………………………………N-16 
+LATIN AMERICAN DATA BASE AND LATIN AMERICAN OUTREACH…………………………………… L-12
+ECONOMICS (ECON)………………………………………………………………………………………………M-14 
+JOHN AND JUNE PEROVICH BUSINESS CENTER………………………………………………………………J-11
+HOKONA HALL (ZUNI-OFFICES, ZIA-DORMITORY) (HOKW)………………………………………………N-14 
+COUNSELING, ASSISTANCE AND REFERRAL SERVICE (CARS)……………………………………………K-12
+JOHNSON CENTER (JOHNS)………………………………………………………………………………………N-17 
+CENTER FOR SCIENCE, TECHNOLOGY, AND POLICY……………………………………………………… K-12
+STUDENT UNION BUILDING (SUB) (NMU)…………………………………………………………………… M-16 
+EXTENDED UNIVERSITY…………………………………………………………………………………………K-13
+SANTA CLARA HALL DORMITORY………………………………………………………………………………O-14 
+UNM PUBLIC EVENTS / POPEJOY……………………………………………………………………………… K-13
+CENTER FOR THE ARTS (POPEJOY, KELLER HALL, FINE ARTS MUSEUM) (CTRART)…………………M-17 
+HOUSE OF PREVENTION EPIDEMIOLOGY (HOPE)……………………………………………………………K-13
+TECHNOLOGY & EDUCATION CENTER (TECH)………………………………………………………………N-14 
+PSYCHOLOGY CLINIC / AGORA CRISIS CENTER (PSYC)……………………………………………………K-13
+TRAVELSTEAD HALL (TRAV)……………………………………………………………………………………M-14 
+REDONDO VILLAGE STUDENT RESIDENCES…………………………………………………………………P-16
+SIMPSON HALL (SIMP)……………………………………………………………………………………………N-14 
+GEORGE PEARL HALL (PEARL)…………………………………………………………………………………N-17
+EDUCATION CLASSROOMS (EDUC)…………………………………………………………………………… M-15 
+PARKING STRUCTURE / PARKING & TRANSPORTATION SERVICES………………………………………M-17
+MASLEY HALL (MASLEY)…………………………………………………………………………………………N-15
+KIVA (KIVA)…………………………………………………………………………………………………………N-15
+MANZANITA CENTER (MANZ)……………………………………………………………………………………N-15
+SANTA ANA HALL (DORMITORY)………………………………………………………………………………P-15 
+STUDENT HEALTH CENTER AND UNDERGRADUATE STUDIES (SHC)……………………………………M-16 
+LAGUNA HALL (DORMITORY) (LAGUNA)…………………………………………………………………… O-14 
+DEVARGAS HALL (DORMITORY) (DEVARG)…………………………………………………………………O-14 
+ANDERSON SCHOOL OF MANAGEMENT (ASM)………………………………………………………………M-14 
+LA POSADA DINING HALL…………………………………………………………………………………………O-14 
+SOCIAL SCIENCES (SSCO)…………………………………………………………………………………………M-14 
+ORTEGA HALL (ORTG)……………………………………………………………………………………………L-15 
+HUMANITIES (HUM)………………………………………………………………………………………………L-15
+WOODWARD LECTURE HALL (WOOD)…………………………………………………………………………L-16 
+CONSORTIUM FOR ENVIRO. RESEARCH, INFORMATICS & ART (CERIA)…………………………………L-16 
+ART (ART)……………………………………………………………………………………………………………L-16 
+UNIVERSITY ADVISEMENT & ENRICHMENT CENTER (UAEC)……………………………………………N-15 
+ANDERSON GRADUATE SCHOOL OF MANAGEMENT / PARISH LIBRARY (GSM)………………………M-13 
+STUDENT RESIDENCE CENTER (SRC)………………………………………………………………………… O-15 
+CASAS DEL RIO…………………………………………………………………………………………………… O-15 
+BOOKSTORE…………………………………………………………………………………………………………M-17 
+HODGIN HALL (HODGIN)…………………………………………………………………………………………J-17 
+SARA RAYNOLDS HALL (SARAR)………………………………………………………………………………K-17

@@ -29,7 +29,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -40,6 +43,8 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.Collections;
 
 
 public class MainActivity extends AppCompatActivity
@@ -49,6 +54,7 @@ public class MainActivity extends AppCompatActivity
     TouchImageView img;
     static boolean newImageRequired = false;
     static boolean focusRequired = false;
+    boolean currentlyFocused = false;
     static float eventGetX = 0;
     static float eventGetY = 0;
     float minScale;
@@ -63,6 +69,11 @@ public class MainActivity extends AppCompatActivity
     static float screenHeight;
     static boolean initialiazing = true;
     Bitmap bitmap;
+
+    ListView searchListView;
+    ArrayList<String> searchArray;
+    ArrayAdapter<String> adapter;
+
 
     com.sothree.slidinguppanel.SlidingUpPanelLayout sliding;
 
@@ -83,8 +94,16 @@ public class MainActivity extends AppCompatActivity
             {
 //                Snackbar.make(view, "Replace with your own action(s)", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
-                sliding.setElevation(500);
-                sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                //sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                img.matrix.postScale(3f, 3f);
+                img.setImageMatrix(img.matrix);
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                    }
+                });
             }
         });
 
@@ -115,40 +134,40 @@ public class MainActivity extends AppCompatActivity
         //sliding.setTouchEnabled(false);
 
         //sliding.setPanelHeight(500);
-        InputStream inputStream = getResources().openRawResource(+R.drawable.map50);
-        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
-        tmpOptions.inJustDecodeBounds = true;
-        tmpOptions.inMutable = true;
-        BitmapFactory.decodeStream(inputStream, null, tmpOptions);
-
-        int width = tmpOptions.outWidth;
-        int height = tmpOptions.outHeight;
-        //fullOrigWidth = tmpOptions.outWidth;
-        //fullOrigHeight = tmpOptions.outWidth;
+//        InputStream inputStream = getResources().openRawResource(+R.drawable.map50);
+//        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
+//        tmpOptions.inJustDecodeBounds = true;
+//        tmpOptions.inMutable = true;
+//        BitmapFactory.decodeStream(inputStream, null, tmpOptions);
+//
+//        int width = tmpOptions.outWidth;
+//        int height = tmpOptions.outHeight;
+//        fullOrigWidth = tmpOptions.outWidth;
+//        fullOrigHeight = tmpOptions.outWidth;
 
 // Crop image:
 // Crop a rect with 200 pixel width and height from center of image
-        BitmapRegionDecoder bitmapRegionDecoder = null;
-        try
-        {
-            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(inputStream, false);
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
-        options.inMutable = true;
+//        BitmapRegionDecoder bitmapRegionDecoder = null;
+//        try
+//        {
+//            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(inputStream, false);
+//        } catch (IOException e)
+//        {
+//            e.printStackTrace();
+//        }
+//
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//        options.inPreferredConfig = Bitmap.Config.RGB_565;
+//        options.inMutable = true;
         screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
         //getActualScreenHeight();
-
+resetBitmap();
         //xPer = ((float) width - ((float) screenWidth * 1.5f)) / fullOrigWidth;
         //yPer = (height - screenHeight) / (height *2) ;
 
-        bitmap = bitmapRegionDecoder.decodeRegion(new Rect((int) ((double) width * .3), 0, width, height), options);
-        bitmap = convertToMutable(this, bitmap);
+//        bitmap = bitmapRegionDecoder.decodeRegion(new Rect((int) ((double) width * .3), 0, width, height), options);
+        //bitmap = convertToMutable(this, bitmap);
         //Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, screenWidth * 2, (int)screenHeight * 2, false);
         img = new TouchImageView(getApplicationContext(), minScale, 1);
         img.setImageBitmap(bitmap);
@@ -159,63 +178,17 @@ public class MainActivity extends AppCompatActivity
         //fullScale = .5f;
 
         sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-    }
 
-    /**
-     * Converts a immutable bitmap to a mutable bitmap. This operation doesn't allocates
-     * more memory that there is already allocated.
-     *
-     * @param imgIn - Source image. It will be released, and should not be used more
-     * @return a copy of imgIn, but muttable.
-     */
-    public static Bitmap convertToMutable1(Bitmap imgIn)
-    {
-        try
-        {
-            //this is the file going to use temporally to save the bytes.
-            // This file will not be a image, it will store the raw image data.
-            File file = new File(Environment.getExternalStorageDirectory() + File.separator + "temp.tmp");
+        searchListView = new ListView(this);
+        searchListView.setBackgroundColor(Color.WHITE);
+//        ListView listView = (ListView) findViewById(R.id.searchListView);
 
-            //Open an RandomAccessFile
-            //Make sure you have added uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-            //into AndroidManifest.xml file
-            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+        searchArray = new ArrayList<>();
+        searchArray.add("adfadsfafd");
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, searchArray);
+        searchListView.setAdapter(adapter);
+        mainLayout.addView(searchListView);
 
-            // get the width and height of the source bitmap.
-            int width = imgIn.getWidth();
-            int height = imgIn.getHeight();
-            Bitmap.Config type = imgIn.getConfig();
-
-            //Copy the byte to the file
-            //Assume source bitmap loaded using options.inPreferredConfig = Config.ARGB_8888;
-            FileChannel channel = randomAccessFile.getChannel();
-            MappedByteBuffer map = channel.map(FileChannel.MapMode.READ_WRITE, 0, imgIn.getRowBytes() * height);
-            imgIn.copyPixelsToBuffer(map);
-            //recycle the source bitmap, this will be no longer used.
-            imgIn.recycle();
-            System.gc();// try to force the bytes from the imgIn to be released
-
-            //Create a new bitmap to load the bitmap again. Probably the memory will be available.
-            imgIn = Bitmap.createBitmap(width, height, type);
-            map.position(0);
-            //load it back from temporary
-            imgIn.copyPixelsFromBuffer(map);
-            //close the temporary file and channel , then delete that also
-            channel.close();
-            randomAccessFile.close();
-
-            // delete the temp file
-            file.delete();
-
-        } catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return imgIn;
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -251,14 +224,31 @@ public class MainActivity extends AppCompatActivity
         return null;
     }
 
-    public static Bitmap createImage(int width, int height, int color)
+    private void resetBitmap()
     {
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        Paint paint = new Paint();
-        paint.setColor(color);
-        canvas.drawRect(0F, 0F, (float) width, (float) height, paint);
-        return bitmap;
+        InputStream inputStream = getResources().openRawResource(+R.drawable.map50);
+        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
+        tmpOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(inputStream, null, tmpOptions);
+
+        int width = tmpOptions.outWidth;
+        int height = tmpOptions.outHeight;
+        BitmapRegionDecoder bitmapRegionDecoder = null;
+        try
+        {
+            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(inputStream, false);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        //screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+        //screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+
+        bitmap = bitmapRegionDecoder.decodeRegion(new Rect((int) ((double) width * .3), 0, width, height), options);
+        bitmap = convertToMutable(this, bitmap);
     }
 
     private void getActualScreenHeight()
@@ -351,13 +341,34 @@ public class MainActivity extends AppCompatActivity
         float y = eventGetY / info[2] + info[1];
         System.out.println(x);
         System.out.println(y);
-        highlightBuilding(x, y);
+        if (!currentlyFocused)
+        {
+            highlightBuilding(x, y);
+
+        }
+        else
+        {
+            resetBitmap();
+
+        }
         runOnUiThread(new Runnable()
         {
             @Override
             public void run()
             {
-                sliding.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);                //sliding.setElevation(500);
+                if (!currentlyFocused)
+                {
+                    sliding.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+
+                }
+                else
+                {
+                    img.setImageBitmap(bitmap);
+
+                    sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+                }
+                currentlyFocused = !currentlyFocused;
+
 
             }
         });
@@ -497,13 +508,35 @@ public class MainActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
-        // Get the SearchView and set the searchable configuration
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) menu.findItem(R.id.menu_search).getActionView();
-        // Assumes current activity is the searchable activity
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+//        // Get the SearchView and set the searchable configuration
+//        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+//        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) menu.findItem(R.id.menu_search).getActionView();
+//        // Assumes current activity is the searchable activity
+//        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+//        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
 
+
+        MenuItem item = menu.findItem(R.id.menu_search);
+        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) item.getActionView();
+        searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener()
+        {
+            @Override
+            public boolean onQueryTextSubmit(String s)
+            {
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s)
+            {
+                System.out.println("text change");
+                searchArray.add("New schedule");
+                //searchArray.remove(0);
+                adapter.notifyDataSetChanged();
+                return false;
+            }
+        });
         return true;
     }
 
