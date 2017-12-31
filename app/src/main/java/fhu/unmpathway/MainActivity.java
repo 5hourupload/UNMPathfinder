@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.MenuItemCompat;
 import android.util.Base64;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -79,14 +80,14 @@ public class MainActivity extends AppCompatActivity
     ArrayAdapter<String> adapter;
     float botRightX = 2927;
     float botRightY = 2495;
-    //@35.0811093,-106.6134433
-    double botRightLat = 35.0811093f;
-    double botRightLon = -106.6134433f;
+    //35.081051, -106.613288
+    double botRightLat = 35.081051;
+    double botRightLon = -106.613288;
     float topLeftX = 479;
     float topLeftY = 165;
-    //@35.0900785,-106.6248843
-    double topLeftLat = 35.0900785f;
-    double topLeftLon = -106.6248843f;
+    //35.090176, -106.625190
+    double topLeftLat = 35.090176;
+    double topLeftLon = -106.625190;
 
 
     com.sothree.slidinguppanel.SlidingUpPanelLayout sliding;
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity
     ArrayList<Double> lons = new ArrayList<>();
     ArrayList<Integer> buildingPixelsX = new ArrayList<>();
     ArrayList<Integer> buildingPixelsY = new ArrayList<>();
-
+    android.support.v7.widget.SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -114,8 +115,8 @@ public class MainActivity extends AppCompatActivity
 //                Snackbar.make(view, "Replace with your own action(s)", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
                 //sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-                img.matrix.postScale(3f, 3f);
-                img.setImageMatrix(img.matrix);
+                //img.matrix.postScale(3f, 3f);
+//                img.setImageMatrix(img.matrix);
             }
         });
 
@@ -200,28 +201,21 @@ public class MainActivity extends AppCompatActivity
         double pixelDistanceY = botRightY - topLeftY;
         double lonDistance = Math.abs(botRightLon - topLeftLon);
         double latDistance = Math.abs(botRightLat - topLeftLat);
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < buildings.size(); i++)
         {
-            System.out.println(i + "-----------------------");
-            System.out.println(lons.get(i));
-            System.out.println(lats.get(i));
             double lonPer = (lons.get(i) - topLeftLon) / lonDistance;
             double latPer = (topLeftLat - lats.get(i)) / latDistance;
-            System.out.println(lonDistance);
-            System.out.println(lonPer);
-            System.out.println(latPer);
             buildingPixelsX.add((int) ((lonPer * pixelDistanceX) + topLeftX));
             buildingPixelsY.add((int) ((latPer * pixelDistanceY) + topLeftY));
-            System.out.println(buildingPixelsX.get(i));
-            System.out.println(buildingPixelsY.get(i));
-
         }
+
     }
 
 
     private void focusOnBuildingFromSearch(String string)
     {
-        for (int i = 0; i < buildings.size(); i++)
+        int i;
+        for (i = 0; i < buildings.size(); i++)
         {
             if (buildings.get(i).contains(string))
             {
@@ -229,6 +223,32 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+        currentlyFocused = true;
+
+//        img.matrix.postScale(1,1);
+//        img.saveScale = 1;
+//        img.fixTrans();
+
+        int x = buildingPixelsX.get(i);
+        int y = buildingPixelsY.get(i);
+        int currentX = (int) img.getImageInfo()[0];
+        int currentY = (int) img.getImageInfo()[1];
+        float scale = img.getImageInfo()[2];
+        final int deltaX = currentX - (int)(x * scale);
+        final int deltaY = currentY - (int)(y*scale);
+        System.out.println(deltaX);
+        System.out.println(deltaY);
+
+        searchView.setQuery("", false);
+        searchView.setIconified(true);
+
+        img.matrix.postTranslate(deltaX + (screenWidth/4)*scale, deltaY + (screenHeight/4)*scale);
+
+        img.matrix.postScale(2/scale,2/scale);
+        img.saveScale = 2;
+        img.fixTrans();
+        img.setImageMatrix(img.matrix);
+        img.invalidate();
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -578,7 +598,7 @@ public class MainActivity extends AppCompatActivity
 
 
         MenuItem item = menu.findItem(R.id.menu_search);
-        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) item.getActionView();
+        searchView = (android.support.v7.widget.SearchView) item.getActionView();
         searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener()
         {
             @Override
@@ -591,20 +611,21 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onQueryTextChange(String s)
             {
+                searchArray.clear();
                 if (s.equals(""))
                 {
-                    searchArray.clear();
-                    adapter.notifyDataSetChanged();
+                    searchListView.setVisibility(View.INVISIBLE);
+                    //adapter.notifyDataSetChanged();
                     return false;
                 }
-                searchArray.clear();
+                searchListView.setVisibility(View.VISIBLE);
                 s = s.toUpperCase();
                 for (String b : buildings)
                 {
                     if (b.contains(s))
                         searchArray.add(b);
                 }
-                //searchArray.remove(0);
+                img.fixTrans();
                 adapter.notifyDataSetChanged();
                 return false;
             }
