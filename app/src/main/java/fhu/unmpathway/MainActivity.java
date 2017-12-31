@@ -29,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -36,10 +37,13 @@ import android.widget.SearchView;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -67,7 +71,7 @@ public class MainActivity extends AppCompatActivity
     static float yPer = 0;
     static float screenWidth;
     static float screenHeight;
-    static boolean initialiazing = true;
+    static boolean initializing = true;
     Bitmap bitmap;
 
     ListView searchListView;
@@ -76,19 +80,21 @@ public class MainActivity extends AppCompatActivity
     float botRightX = 2927;
     float botRightY = 2495;
     //@35.0811093,-106.6134433
-    float botRightXCoord = 35.0811093f;
-    float botRightYCoord = -106.6134433f;
+    double botRightLat = 35.0811093f;
+    double botRightLon = -106.6134433f;
     float topLeftX = 479;
     float topLeftY = 165;
     //@35.0900785,-106.6248843
-    float topLeftXCoord = 35.0900785f;
-    float topLeftYCoord = -106.6248843f;
-
-
-
+    double topLeftLat = 35.0900785f;
+    double topLeftLon = -106.6248843f;
 
 
     com.sothree.slidinguppanel.SlidingUpPanelLayout sliding;
+    ArrayList<String> buildings = new ArrayList<>();
+    ArrayList<Double> lats = new ArrayList<>();
+    ArrayList<Double> lons = new ArrayList<>();
+    ArrayList<Integer> buildingPixelsX = new ArrayList<>();
+    ArrayList<Integer> buildingPixelsY = new ArrayList<>();
 
 
     @Override
@@ -139,13 +145,89 @@ public class MainActivity extends AppCompatActivity
 
         searchListView = new ListView(this);
         searchListView.setBackgroundColor(Color.WHITE);
-//        ListView listView = (ListView) findViewById(R.id.searchListView);
-
         searchArray = new ArrayList<>();
-        searchArray.add("adfadsfafd");
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, searchArray);
         searchListView.setAdapter(adapter);
         mainLayout.addView(searchListView);
+        readFile();
+        searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                // Get the selected item text from ListView
+                String selectedItem = (String) parent.getItemAtPosition(position);
+
+                // Display the selected item text on TextView
+                focusOnBuildingFromSearch(selectedItem);
+            }
+        });
+
+    }
+
+    private void readFile()
+    {
+        try
+        {
+            BufferedReader br = new BufferedReader(new
+                    InputStreamReader(getAssets().open("buildings_index.txt")));
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null)
+            {
+                buildings.add(line.substring(0, line.indexOf("@")));
+
+                int atSign = line.indexOf("@");
+                int comma1 = line.indexOf(",", atSign);
+                lats.add(Double.parseDouble(line.substring(atSign + 1, comma1)));
+                lons.add(Double.parseDouble(line.substring(comma1 + 1)));
+                sb.append(line);
+                sb.append(System.lineSeparator());
+                line = br.readLine();
+            }
+            String everything = sb.toString();
+            convertCoordsToPixels();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void convertCoordsToPixels()
+    {
+        double pixelDistanceX = botRightX - topLeftX;
+        double pixelDistanceY = botRightY - topLeftY;
+        double lonDistance = Math.abs(botRightLon - topLeftLon);
+        double latDistance = Math.abs(botRightLat - topLeftLat);
+        for (int i = 0; i < 4; i++)
+        {
+            System.out.println(i + "-----------------------");
+            System.out.println(lons.get(i));
+            System.out.println(lats.get(i));
+            double lonPer = (lons.get(i) - topLeftLon) / lonDistance;
+            double latPer = (topLeftLat - lats.get(i)) / latDistance;
+            System.out.println(lonDistance);
+            System.out.println(lonPer);
+            System.out.println(latPer);
+            buildingPixelsX.add((int) ((lonPer * pixelDistanceX) + topLeftX));
+            buildingPixelsY.add((int) ((latPer * pixelDistanceY) + topLeftY));
+            System.out.println(buildingPixelsX.get(i));
+            System.out.println(buildingPixelsY.get(i));
+
+        }
+    }
+
+
+    private void focusOnBuildingFromSearch(String string)
+    {
+        for (int i = 0; i < buildings.size(); i++)
+        {
+            if (buildings.get(i).contains(string))
+            {
+                break;
+            }
+        }
 
     }
 
@@ -191,8 +273,6 @@ public class MainActivity extends AppCompatActivity
 
         int width = tmpOptions.outWidth;
         int height = tmpOptions.outHeight;
-        System.out.println(height);
-        System.out.println("+++++++++++++++++++++++");
         BitmapRegionDecoder bitmapRegionDecoder = null;
         try
         {
@@ -248,7 +328,6 @@ public class MainActivity extends AppCompatActivity
         img.setImageBitmap(bmp);
         mainLayout.addView(img);
 
-        System.out.println("about");
         ViewTreeObserver vto = img.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener()
         {
@@ -256,8 +335,6 @@ public class MainActivity extends AppCompatActivity
             {
                 img.getViewTreeObserver().removeOnPreDrawListener(this);
                 screenHeight = img.getMeasuredHeight();
-                System.out.println("in tree" + screenHeight);
-                initialiazing = false;
                 return true;
             }
         });
@@ -287,7 +364,6 @@ public class MainActivity extends AppCompatActivity
                     {
 
                     }
-                    System.out.println("passed");
                     try
                     {
                         newImage();
@@ -312,7 +388,6 @@ public class MainActivity extends AppCompatActivity
                     {
 
                     }
-                    System.out.println("focus");
                     focusOnBuilding();
                     focusRequired = false;
                 }
@@ -327,18 +402,13 @@ public class MainActivity extends AppCompatActivity
         float[] info = img.getImageInfo();
         float x = eventGetX / info[2] + info[0];
         float y = eventGetY / info[2] + info[1];
-        System.out.println(x);
-        System.out.println(y);
-        float xCoordDiff = Math.abs((botRightXCoord - topLeftXCoord) / (botRightX - topLeftX));
-        float yCoordDiff = Math.abs((botRightYCoord - topLeftYCoord)/ (botRightY - topLeftY));
-        System.out.println(yCoordDiff);
-        System.out.println(xCoordDiff);
-        float xCoord =  topLeftXCoord - ((x - topLeftX) * xCoordDiff);
-        float yCoord =  topLeftYCoord + ((y - topLeftY) * yCoordDiff);
-        System.out.printf("%.9f",xCoord);
-        System.out.println(" ");
-        System.out.printf("%.9f",yCoord);
-        System.out.println("");
+        double lonCoordDiff = Math.abs((botRightLon - topLeftLon));
+        double latCoordDiff = Math.abs((botRightLat - topLeftLat));
+        float xPer = (x - topLeftX) / (botRightX - topLeftX);
+        float yPer = (y - topLeftY) / (botRightY - topLeftY);
+
+        double latCoord = topLeftLat - (yPer * latCoordDiff);
+        double lonCoord = topLeftLon + (xPer * lonCoordDiff);
 
 
         if (!currentlyFocused)
@@ -409,23 +479,16 @@ public class MainActivity extends AppCompatActivity
                 float[] info = img.getImageInfo();
                 float tempScale = img.getScale();
 
-                System.out.println("new scale" + fullScale);
                 float x0 = info[0];
                 float y0 = info[1];
 
-                System.out.println("xPer: " + xPer);
-                System.out.println("x0: " + x0);
-                System.out.println("yPer: " + yPer);
-                System.out.println("y0: " + y0);
+
                 xPer = xPer + (x0 - .25f) / fullScale;
                 yPer = yPer + (y0 - .25f) / fullScale;
                 xPer = Math.max(xPer, 0);
                 yPer = Math.max(yPer, 0);
                 xPer = Math.min(xPer, 1);
                 yPer = Math.min(yPer, 1);
-
-                System.out.println(xPer);
-                System.out.println(yPer);
 
                 fullScale *= tempScale;
                 float mapScreenSizeWidth = (screenWidth / fullScale);
@@ -465,8 +528,6 @@ public class MainActivity extends AppCompatActivity
 
                 int left = (int) (xPer * (float) width);
                 int top = (int) (yPer * (float) height);
-                System.out.println("left: " + left);
-                System.out.println("top: " + top);
 
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
@@ -530,8 +591,19 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onQueryTextChange(String s)
             {
-                System.out.println("text change");
-                searchArray.add("New schedule");
+                if (s.equals(""))
+                {
+                    searchArray.clear();
+                    adapter.notifyDataSetChanged();
+                    return false;
+                }
+                searchArray.clear();
+                s = s.toUpperCase();
+                for (String b : buildings)
+                {
+                    if (b.contains(s))
+                        searchArray.add(b);
+                }
                 //searchArray.remove(0);
                 adapter.notifyDataSetChanged();
                 return false;
