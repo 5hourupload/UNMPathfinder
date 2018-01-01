@@ -42,7 +42,7 @@ public class TouchImageView extends ImageView
     PointF start = new PointF();
     //    float minScale = 1f;
 //    float maxScale = 3f;
-    float minScale = -50f;
+    float minScale = .5f;
     float maxScale = 50f;
     float[] m;
     int viewWidth, viewHeight;
@@ -64,12 +64,10 @@ public class TouchImageView extends ImageView
     boolean threadActive = false;
 
 
-    public TouchImageView(Context context, float mS, float cS)
+    public TouchImageView(Context context)
     {
         super(context);
         sharedConstructing(context);
-        minScale = mS;
-        saveScale = cS;
     }
 
     public TouchImageView(Context context, AttributeSet attrs)
@@ -209,7 +207,7 @@ public class TouchImageView extends ImageView
                 }
                 System.out.println("done");
                 threadActive = false;
-                MainActivity.newImageRequired = true;
+                //MainActivity.newImageRequired = true;
 //                try
 //                {
 //                    setNewImage();

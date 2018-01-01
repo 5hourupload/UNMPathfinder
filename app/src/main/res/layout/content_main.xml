@@ -7,48 +7,10 @@
 	android:layout_height="match_parent"
 	app:layout_behavior="@string/appbar_scrolling_view_behavior"
 	tools:context="fhu.unmpathway.MainActivity"
-	tools:showIn="@layout/app_bar_main">
+	tools:showIn="@layout/app_bar_main"
+	android:id="@+id/content_main">
 
 
-	<com.sothree.slidinguppanel.SlidingUpPanelLayout
-		xmlns:sothree="http://schemas.android.com/apk/res-auto"
-		android:id="@+id/sliding_layout"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:gravity="bottom"
-		sothree:umanoPanelHeight="68dp"
-		sothree:umanoShadowHeight="4dp">
-
-		<RelativeLayout
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:id="@+id/standard_layout">
-
-			<ListView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:id="@+id/searchListView">
-
-			</ListView>
-
-			<android.support.design.widget.FloatingActionButton
-				android:id="@+id/fab"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="bottom|end"
-				android:layout_margin="@dimen/fab_margin"
-				app:srcCompat="@android:drawable/ic_dialog_email"
-				android:layout_alignParentBottom="true"
-				android:layout_alignParentRight="true"/>
-
-		</RelativeLayout>
-		<TextView
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:gravity="center|top"
-			android:text="The Awesome Sliding Up Panel"
-			android:textSize="16sp" />
-	</com.sothree.slidinguppanel.SlidingUpPanelLayout>
 	<RelativeLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
