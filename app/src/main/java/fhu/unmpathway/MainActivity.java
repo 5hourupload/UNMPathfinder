@@ -67,16 +67,16 @@ public class MainActivity extends AppCompatActivity
     static float eventGetY = 0;
     static float trueX = 0;
 
-    float botRightX = 2927;
-    float botRightY = 2495;
+    static float botRightX = 2927;
+    static float botRightY = 2495;
     //35.081051, -106.613288
-    double botRightLat = 35.081051;
-    double botRightLon = -106.613288;
-    float topLeftX = 479;
-    float topLeftY = 165;
+    static double botRightLat = 35.081051;
+    static double botRightLon = -106.613288;
+    static float topLeftX = 479;
+    static float topLeftY = 165;
     //35.090176, -106.625190
-    double topLeftLat = 35.090176;
-    double topLeftLon = -106.625190;
+    static double topLeftLat = 35.090176;
+    static double topLeftLon = -106.625190;
 
     static ArrayList<String> buildings = new ArrayList<>();
     static ArrayList<Double> lats = new ArrayList<>();

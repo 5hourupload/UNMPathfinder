@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -38,12 +39,20 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
+import static fhu.unmpathway.MainActivity.botRightLat;
+import static fhu.unmpathway.MainActivity.botRightLon;
+import static fhu.unmpathway.MainActivity.botRightX;
+import static fhu.unmpathway.MainActivity.botRightY;
 import static fhu.unmpathway.MainActivity.buildingPixelsX;
 import static fhu.unmpathway.MainActivity.buildingPixelsY;
 import static fhu.unmpathway.MainActivity.buildings;
 import static fhu.unmpathway.MainActivity.eventGetX;
 import static fhu.unmpathway.MainActivity.eventGetY;
 import static fhu.unmpathway.MainActivity.focusRequired;
+import static fhu.unmpathway.MainActivity.topLeftLat;
+import static fhu.unmpathway.MainActivity.topLeftLon;
+import static fhu.unmpathway.MainActivity.topLeftX;
+import static fhu.unmpathway.MainActivity.topLeftY;
 
 /**
  * Created by alans on 12/31/2017.
@@ -68,6 +77,11 @@ public class MapFrag extends Fragment
     int searchMode = REGULAR_SEARCH;
     TextView fromText;
     TextView toText;
+
+    LinearLayout buildingsCollapse;
+    LinearLayout directionsCollapse;
+    LinearLayout info_layout;
+    LinearLayout directions_layout;
 
     @Nullable
     @Override
@@ -195,6 +209,26 @@ public class MapFrag extends Fragment
 
             }
         });
+        info_layout = getView().findViewById(R.id.information_layout);
+        directions_layout = getView().findViewById(R.id.directions_layout);
+        buildingsCollapse = getView().findViewById(R.id.building_collapse);
+        directionsCollapse = getView().findViewById(R.id.directions_collapse);
+        directions_layout.setVisibility(View.GONE);
+        directionsCollapse.setVisibility(View.GONE);
+
+        Button getDirectionsButton = getView().findViewById(R.id.get_directions_button);
+        getDirectionsButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                directions_layout.setVisibility(View.VISIBLE);
+                info_layout.setVisibility(View.GONE);
+                sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                buildingsCollapse.setVisibility(View.GONE);
+                directionsCollapse.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     private void resetBitmap()
@@ -277,50 +311,127 @@ public class MapFrag extends Fragment
 
     private void focusOnBuildingFromClick()
     {
-
         img.fixTrans();
-        float[] info = img.getImageInfo();
-        float x = (eventGetX + info[0]) / info[2];
-        float y = (eventGetY + info[1]) / info[2];
+
+        if (searchMode == REGULAR_SEARCH)
+        {
+            if (currentlyFocused)
+            {
+                resetBitmap();
+                getActivity().runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        img.setImageBitmap(bitmap);
+                        sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+                    }
+                });
+                currentlyFocused = !currentlyFocused;
+                return;
+            }
+
+            float[] info = img.getImageInfo();
+            float x = (eventGetX + info[0]) / info[2];
+            float y = (eventGetY + info[1]) / info[2];
 //        double lonCoordDiff = Math.abs((botRightLon - topLeftLon));
 //        double latCoordDiff = Math.abs((botRightLat - topLeftLat));
 //        float xPer = (x - topLeftX) / (botRightX - topLeftX);
 //        float yPer = (y - topLeftY) / (botRightY - topLeftY);
 //        double latCoord = topLeftLat - (yPer * latCoordDiff);
 //        double lonCoord = topLeftLon + (xPer * lonCoordDiff);
-
-        System.out.println(info[0]);
-        System.out.println(x);
-        System.out.println(y);
-
-        if (!currentlyFocused)
-        {
-            highlightBuilding(x, y);
-        }
-        else
-        {
-            resetBitmap();
-        }
-        getActivity().runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
+            int index = 0;
+            double minDistance = 99999;
+            for (int i = 0; i < buildingPixelsX.size(); i++)
             {
-                if (!currentlyFocused)
+                double distance = Math.sqrt(Math.pow(x - buildingPixelsX.get(i), 2) + Math.pow(y - buildingPixelsY.get(i), 2));
+                if (distance < minDistance)
                 {
-                    sliding.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    minDistance = distance;
+                    index = i;
                 }
-                else
-                {
-                    img.setImageBitmap(bitmap);
-
-                    sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-                }
-                currentlyFocused = !currentlyFocused;
-
 
             }
-        });
+            if (minDistance > 200)
+            {
+                return;
+            }
+            x = buildingPixelsX.get(index);
+            y = buildingPixelsY.get(index);
+            final String building = buildings.get(index);
+
+            highlightBuilding(x, y);
+
+
+            getActivity().runOnUiThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    sliding.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    updateTextViews(building);
+                }
+            });
+            currentlyFocused = !currentlyFocused;
+
+        }
+        if (searchMode == STARTING_POINT || searchMode == DESTINATION)
+        {
+
+            float[] info = img.getImageInfo();
+            float x = (eventGetX + info[0]) / info[2];
+            float y = (eventGetY + info[1]) / info[2];
+        double lonCoordDiff = Math.abs((botRightLon - topLeftLon));
+        double latCoordDiff = Math.abs((botRightLat - topLeftLat));
+        float xPer = (x - topLeftX) / (botRightX - topLeftX);
+        float yPer = (y - topLeftY) / (botRightY - topLeftY);
+        double latCoord = topLeftLat - (yPer * latCoordDiff);
+        double lonCoord = topLeftLon + (xPer * lonCoordDiff);
+
+            int index = 0;
+            double minDistance = 99999;
+            for (int i = 0; i < buildingPixelsX.size(); i++)
+            {
+                double distance = Math.sqrt(Math.pow(x - buildingPixelsX.get(i), 2) + Math.pow(y - buildingPixelsY.get(i), 2));
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    index = i;
+                }
+            }
+            String building;
+            if (minDistance < 200)
+            {
+                x = buildingPixelsX.get(index);
+                y = buildingPixelsY.get(index);
+                building = buildings.get(index);
+            }
+            else
+            {
+                building = "@" + latCoord+","+lonCoord;
+            }
+            final String title = building;
+            getActivity().runOnUiThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    if (searchMode == STARTING_POINT)
+                    {
+                        fromText.setText(title);
+                        sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                    }
+                    if (searchMode == DESTINATION)
+                    {
+                        toText.setText(title);
+                        sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                    }
+                }
+            });
+
+
+        }
+
     }
 
     private void highlightBuilding(float x, float y)
