@@ -67,7 +67,9 @@ public class MainActivity extends AppCompatActivity
     static float eventGetY = 0;
     static float trueX = 0;
 
-    static float botRightX = 2927;
+    //old, potentially wrong
+//    static float botRightX = 2927;
+    static float botRightX = 3020;
     static float botRightY = 2495;
     //35.081051, -106.613288
     static double botRightLat = 35.081051;
@@ -84,6 +86,15 @@ public class MainActivity extends AppCompatActivity
     static ArrayList<Integer> buildingPixelsX = new ArrayList<>();
     static ArrayList<Integer> buildingPixelsY = new ArrayList<>();
 
+    Bitmap image;
+    static boolean[][] buildingsPath;
+    static boolean[][] visitedPixels;
+    static Node[][] nodeArray;
+    static int DRAW_WIDTH;
+    static int DRAW_HEIGHT;
+
+    ArrayList<Integer> pixelsX = new ArrayList<>();
+    ArrayList<Integer> pixelsY = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -93,19 +104,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener()
-//        {
-//            @Override
-//            public void onClick(View view)
-//            {
-////                Snackbar.make(view, "Replace with your own action(s)", Snackbar.LENGTH_LONG)
-////                        .setAction("Action", null).show();
-//                //sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-//                //img.matrix.postScale(3f, 3f);
-////                img.setImageMatrix(img.matrix);
-//            }
-//        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -119,6 +117,16 @@ public class MainActivity extends AppCompatActivity
 
         readFile();
         displaySelectedScreen(R.id.standard);
+
+        loadPathImage();
+        DRAW_WIDTH = image.getWidth();
+        DRAW_HEIGHT = image.getHeight();
+        buildingsPath = new boolean[DRAW_WIDTH][DRAW_HEIGHT];
+        visitedPixels = new boolean[DRAW_WIDTH][DRAW_HEIGHT];
+        nodeArray = new Node[DRAW_WIDTH][DRAW_HEIGHT];
+        findBuildings();
+        checkBuildings();
+        image.recycle();
 
     }
 
@@ -207,6 +215,145 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void loadPathImage()
+    {
+        InputStream inputStream = getResources().openRawResource(+R.drawable.map25_cropped_main);
+        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
+        tmpOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(inputStream, null, tmpOptions);
+        int width = tmpOptions.outWidth;
+        int height = tmpOptions.outHeight;
+        BitmapRegionDecoder bitmapRegionDecoder = null;
+        try
+        {
+            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(inputStream, false);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        image = bitmapRegionDecoder.decodeRegion(new Rect(0, 0, width, height), options);
+    }
+
+
+    private void findBuildings()
+    {
+//        PixelReader pR = image.getPixelReader();
+        for (int i = 0; i < image.getWidth(); i++)
+        {
+            for (int j = 0; j < image.getHeight(); j++)
+            {
+                int pixel = image.getPixel(i, j);
+//                Color color = pR.getColor(i, j);
+                int red = Color.red(pixel);
+                int green = Color.green(pixel);
+                int blue = Color.blue(pixel);
+
+                if (red < 40 && green < 40 && blue < 40)
+                {
+                    buildingsPath[i][j] = true;
+                }
+                else
+                {
+                    buildingsPath[i][j] = false;
+                }
+
+
+            }
+        }
+
+    }
+
+    private void checkBuildings()
+    {
+        resetVisitedPixels();
+
+        for (int i = 0; i < image.getWidth(); i++)
+        {
+            for (int j = 0; j < image.getHeight(); j++)
+            {
+                if (buildingsPath[i][j] && !visitedPixels[i][j])
+                {
+                    int k;
+                    pixelsX.add(i);
+                    pixelsY.add(j);
+
+                    scanBuildings(i, j);
+                    for (k = 1; k < pixelsX.size(); k++)
+                    {
+                        scanBuildings(pixelsX.get(k), pixelsY.get(k));
+                    }
+                    if (k < 60)
+                    {
+                        for (int l = 1; l < pixelsX.size(); l++)
+                        {
+                            buildingsPath[pixelsX.get(l)][pixelsY.get(l)] = false;
+                        }
+                    }
+                    pixelsX.clear();
+                    pixelsY.clear();
+                }
+
+            }
+        }
+    }
+
+
+    private void resetVisitedPixels()
+    {
+        for (int i = 0; i < DRAW_WIDTH; i++)
+        {
+            for (int j = 0; j < DRAW_HEIGHT; j++)
+            {
+                visitedPixels[i][j] = false;
+            }
+        }
+    }
+
+    private void scanBuildings(int x, int y)
+    {
+        visitedPixels[x][y] = true;
+        if (x - 1 > -1)
+        {
+            if (buildingsPath[x - 1][y] && !visitedPixels[x - 1][y])
+            {
+                visitedPixels[x - 1][y] = true;
+                pixelsX.add(x - 1);
+                pixelsY.add(y);
+            }
+        }
+        if (x + 1 < DRAW_WIDTH)
+        {
+            if (buildingsPath[x + 1][y] && !visitedPixels[x + 1][y])
+            {
+                visitedPixels[x + 1][y] = true;
+
+                pixelsX.add(x + 1);
+                pixelsY.add(y);
+            }
+        }
+        if (y - 1 > -1)
+        {
+            if (buildingsPath[x][y - 1] && !visitedPixels[x][y - 1])
+            {
+                visitedPixels[x][y - 1] = true;
+
+                pixelsX.add(x);
+                pixelsY.add(y - 1);
+            }
+        }
+        if (y + 1 < DRAW_HEIGHT)
+        {
+            if (buildingsPath[x][y + 1] && !visitedPixels[x][y + 1])
+            {
+                visitedPixels[x][y + 1] = true;
+
+                pixelsX.add(x);
+                pixelsY.add(y + 1);
+            }
+        }
+    }
 //    @Override
 //    public boolean onCreateOptionsMenu(Menu menu)
 //    {
