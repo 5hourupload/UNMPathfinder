@@ -1,0 +1,41 @@
+#container{position:relative;top:-67px}#page
+h1{margin:0
+0 0 10px;padding:0;background:transparent url(https://search.unm.edu/common/images/search-UNM.png) no-repeat;width:237px;height:80px;text-indent:-9999px;position:relative;top:15px}#search-tabbed-navigation{float:right;overflow:hidden;padding:0;position:relative;right:25px;top:34px;zoom:1;z-index:2}#searchnav{margin:0;padding: .2em .2em 0}#searchnav
+li{display:inline;list-style:none;position:relative}#searchnav li
+a{background-color:#c10037;border:1px
+solid #c10037;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;color:#eee;display:block;float:left;font-weight:bold;margin:0
+5px 0 0;padding:5px
+10px;text-decoration:none;white-space:nowrap;width:8em}#searchnav li a:hover{color:#c10037;background-color:#f5f5f5;border:1px
+solid #e5e5e5;border-bottom:1px solid #e5e5e5}#searchnav
+.current{color:#c10037;background-color:#f5f5f5;border:1px
+solid #e5e5e5;border-bottom:1px solid #f5f5f5 !important}input[type="submit"],input[type="reset"],input[type="button"],button{background:#c10037}.unm_header_title
+a{color:#fff !important}#content_top{display:none}#after_default_1{border:1px
+solid #e5e5e5;overflow:hidden;background-color:#f5f5f5;min-height:200px}.cse .gsc-control-cse,.gsc-control-cse{background-color:transparent !important}.gsc-control-cse{border-color:#f5f5f5 !important;padding-left:0 !important;padding-right:0 !important}.gsc-control-cse table td,
+table.gsc-search-box
+td{border:0
+none !important}.search-box{margin-top:2em;overflow:hidden}.search-form{float:left;margin-left:1em;width:80%}.gsc-completion-container
+td{border:0
+none !important}.gsc-clear-button{display:block;margin-bottom:1.5em}.supporting-links{position:relative;top:5px;float:right;margin-right:1em}.supporting-links
+li{display:inline;padding-right:4px;border-right:1px solid grey}.supporting-links ul li:last-of-type{border:0
+none;padding:0}input.gsc-search-button{background:#C10037 !important;border:1px
+solid rgba(0, 0, 0, 0.15) !important;font-size:inherit !important;padding:3px
+10px 4px !important;height:2em !important;color:#FFF !important;-moz-border-radius:5px !important;-webkit-border-radius:5px !important;border-radius:5px !important}input.gsc-search-button:hover,input.gsc-search-button:focus{background-color:#872300 !important}.gsc-option-menu-container{background-color:#fff !important}.gsc-above-wrapper-area{border-bottom:1px solid #C10037 !important}.gsc-refinementsArea{padding-left:1em !important;border-bottom:0 none !important}.gsc-above-wrapper-area{margin:0
+!important;background-color:#C10037 !important;padding:0
+!important}.gsc-result-info-container{margin:0;padding:0}.gsc-result-info{margin-left:1em;color:#fff !important}.gsc-orderby-label{color:#fff !important}.gsc-wrapper{margin-left:1em;margin-right:1em}img,object{max-width:100%;width:auto;height:auto}@media only screen and (max-width: 767px){#page,#container{width:auto;overflow:hidden}#container.col2,#container.col3{background-image:none}.col2 #primary_aside, .col2 #secondary_aside, .col3 #primary_aside, .col3
+#secondary_aside{width:auto;float:none}.col2 #content_top, .col3
+#content_top{float:none;width:auto}.col2 #content, .col3
+#content{width:100%;float:none}.header_content{width:auto}.left,.right{float:none;margin:0
+0 1em 0}}@media only screen and (min-width: 480px) and (max-width: 767px){#page,#container{width:auto;overflow:hidden}#container.col3{background-image:none}.col3 #primary_aside, .col3
+#secondary_aside{width:auto;float:none}.col3
+#secondary_aside{clear:both}.col3
+#content_top{float:none;width:auto}.col3
+#content{width:auto}.header_content{width:auto}.left,.right{float:none;margin:0
+0 1em 0}}.tinynav{display:none}@media only screen and (max-width: 767px){#unm_header_links,#dept_logo,#social_toolbar,#footer,.supporting-links,.gsc-refinementsArea,.gsc-orderby-container,.gsc-table-cell-thumbnail.gsc-thumbnail{display:none}.unm_header_title{padding-left:10px}.content{padding:0}#search-tabbed-navigation{right:2%;top:25px}.search-form{float:none;margin:0
+auto;width:100%}table.gsc-search-box{width:95% !important;margin:0
+auto}input.gsc-input,input.gsc-search-button{margin-bottom:0}td.gsc-clear-button{margin:0;padding:10px
+0}#page
+h1{margin-top:1em}.gsc-result-info{margin:0
+!important}.gsc-wrapper{margin:0}.gsc-webResult.gsc-result{padding:0
+!important;border-color:transparent !important;background-color:transparent !important}.gsc-result .gs-title{height:auto !important}input.gsc-input{font-size:1.5em !important}input.gsc-search-button{height:2em !important}.gssb_a{font-size:1.5em;padding:5px
+7px !important}.gsc-cursor-page{font-size:2em;padding-right:5px}.gsc-cursor-box{margin-left:10px}.tinynav{display:block}#searchnav{display:none}}@media only screen and (min-width: 480px) and (max-width: 767px){.gsc-refinementsArea{display:block;line-height:2}.gsc-orderby-container{display:table-cell}.gsc-result-info{margin:10px
+0 !important}}@media only screen and (min-width: 768px) and (max-width: 959px){body{background:none}#unm_header,.header_content{width:auto}}

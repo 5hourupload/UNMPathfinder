@@ -1,0 +1,24 @@
+/* Site CSS */
+
+#gsa-reg label {
+float: left;
+font-weight: bold;
+width: 15em;
+}
+
+#gsa-reg input,
+#gsa-reg textarea {
+margin-bottom: 0;
+}
+
+
+/* Styles for News or any other Image - align right only
+*****************************/
+.newsright { 
+    border: 5px solid #ffffff;    
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-bottom: 0px;
+    margin-left: 3px;
+    padding: 3px;
+} 

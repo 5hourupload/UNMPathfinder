@@ -24,6 +24,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -68,7 +70,6 @@ import static fhu.unmpathway.MainActivity.visitedPixels;
 
 public class MapFrag extends Fragment
 {
-
     TouchImageView img;
     boolean currentlyFocused = false;
     float screenWidth;
@@ -98,8 +99,7 @@ public class MapFrag extends Fragment
     int eX = -1;
     int eY = -1;
     Button currentLocationAsStarting;
-    boolean displayingPath = true;
-
+    boolean displayingPath = false;
 
 
     ArrayList<Node> open = new ArrayList<>();
@@ -113,6 +113,7 @@ public class MapFrag extends Fragment
     ArrayList<Integer> pixelsY = new ArrayList<>();
     ArrayList<Node> finalPath = new ArrayList<>();
 
+    WebView web;
 
     @Nullable
     @Override
@@ -128,11 +129,8 @@ public class MapFrag extends Fragment
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
 
-
-
-
         //SET UP MAP
-        final RelativeLayout mainLayout = getView().findViewById(R.id.standard_layout);
+        RelativeLayout mainLayout = getView().findViewById(R.id.standard_layout);
         screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
         resetBitmap();
@@ -144,6 +142,7 @@ public class MapFrag extends Fragment
 
         sliding = getView().findViewById(R.id.sliding_layout);
         sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+        sliding.setDragView(R.id.building_collapse);
 
         searchListView = new ListView(getView().getContext());
         searchListView.setBackgroundColor(Color.WHITE);
@@ -202,7 +201,6 @@ public class MapFrag extends Fragment
             }
         });
 
-
         sliding.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener()
         {
             @Override
@@ -228,7 +226,6 @@ public class MapFrag extends Fragment
             }
 
         });
-
 
         fromText = getView().findViewById(R.id.from_edit);
         fromText.setOnClickListener(new View.OnClickListener()
@@ -257,8 +254,7 @@ public class MapFrag extends Fragment
             }
         });
 
-
-        Button findPath = (Button) getView().findViewById(R.id.find_path);
+        Button findPath = getView().findViewById(R.id.find_path);
         findPath.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -267,6 +263,12 @@ public class MapFrag extends Fragment
                 if (sX == -1 || sY == -1 || eX == -1 || eY == -1)
                 {
                     Snackbar.make(view, "Please select a starting point and destination", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    return;
+                }
+                if (sX == eX && sY == eY)
+                {
+                    Snackbar.make(view, "Starting point and destination are the same", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                     return;
                 }
@@ -337,14 +339,11 @@ public class MapFrag extends Fragment
 
                     }
                 });
-
-
             }
         });
         buildingTitle = (TextView) getView().findViewById(R.id.building_title);
         currentLocationAsStarting = getView().findViewById(R.id.current_location_as_start);
         currentLocationAsStarting.setVisibility(View.GONE);
-
 
         FloatingActionButton fab = (FloatingActionButton) getView().findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener()
@@ -374,6 +373,8 @@ public class MapFrag extends Fragment
             }
         });
 
+        web = getView().findViewById(R.id.webview_content);
+        web.getSettings().setJavaScriptEnabled(true);
     }
 
     private void resetBitmap()
@@ -472,7 +473,10 @@ public class MapFrag extends Fragment
                 currentlyFocused = !currentlyFocused;
                 return;
             }
-
+            if (displayingPath)
+            {
+                return;
+            }
             float[] info = img.getImageInfo();
             float x = (eventGetX + info[0]) / info[2];
             float y = (eventGetY + info[1]) / info[2];
@@ -486,7 +490,6 @@ public class MapFrag extends Fragment
                     minDistance = distance;
                     index = i;
                 }
-
             }
             if (minDistance > 200)
             {
@@ -495,10 +498,8 @@ public class MapFrag extends Fragment
             x = buildingPixelsX.get(index);
             y = buildingPixelsY.get(index);
             final String building = buildings.get(index);
-
             highlightBuilding(x, y);
-
-
+            updateWebView(building);
             getActivity().runOnUiThread(new Runnable()
             {
                 @Override
@@ -506,7 +507,6 @@ public class MapFrag extends Fragment
                 {
                     sliding.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                     buildingTitle.setText(building);
-
                     buildingsCollapse.setVisibility(View.VISIBLE);
                     directionsCollapse.setVisibility(View.GONE);
                     info_layout.setVisibility(View.VISIBLE);
@@ -517,7 +517,6 @@ public class MapFrag extends Fragment
             destination = building;
             eX = (int) x;
             eY = (int) y;
-
         }
         if (searchMode == STARTING_POINT || searchMode == DESTINATION)
         {
@@ -585,14 +584,9 @@ public class MapFrag extends Fragment
                     searchView.setIconified(true);
                     searchMode = REGULAR_SEARCH;
                     currentLocationAsStarting.setVisibility(View.GONE);
-
-
                 }
             });
-
-
         }
-
     }
 
     private void highlightBuilding(float x, float y)
@@ -630,8 +624,9 @@ public class MapFrag extends Fragment
             }
         }
 
-        if (currentlyFocused)
+        if (currentlyFocused || displayingPath)
         {
+            displayingPath = false;
             resetBitmap();
         }
         currentlyFocused = true;
@@ -649,6 +644,7 @@ public class MapFrag extends Fragment
 
         highlightBuilding(x, y);
 
+        updateWebView(string);
 
         img.matrix.postTranslate(deltaX + (screenWidth / 4) * scale, deltaY + (screenHeight / 4) * scale);
         img.matrix.postScale(2 / scale, 2 / scale);
@@ -673,7 +669,6 @@ public class MapFrag extends Fragment
         destination = string;
         eX = x;
         eY = y;
-
     }
 
     @Override
@@ -721,6 +716,28 @@ public class MapFrag extends Fragment
         });
     }
 
+    private void updateWebView(String building)
+    {
+        String[] terms = building.split(" ");
+        //http://search.unm.edu/search/index.html#gsc.tab=0&gsc.q=test1%20test2%20test3&gsc.sort=
+        String urlString = "http://search.unm.edu/search/index.html#gsc.tab=0&gsc.q=";
+        urlString += terms[0];
+        for (int i = 1; i < terms.length; i++)
+        {
+            urlString = urlString + "%20" + terms[i];
+        }
+        urlString = urlString + "&gsc.sort=";
+        final String finalUrl = urlString;
+        getActivity().runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                web.loadUrl(finalUrl);
+            }
+        });
+    }
+
 
     private void path()
     {
@@ -734,8 +751,6 @@ public class MapFrag extends Fragment
         drawStart();
         displayingPath = true;
     }
-
-
 
     private void findPath(int x0, int y0, int x1, int y1)
     {
@@ -1029,8 +1044,6 @@ public class MapFrag extends Fragment
 
         });
     }
-
-
 
     private void resetVisitedPixels()
     {

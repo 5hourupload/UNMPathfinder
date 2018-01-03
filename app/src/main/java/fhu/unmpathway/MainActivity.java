@@ -128,6 +128,8 @@ public class MainActivity extends AppCompatActivity
         checkBuildings();
         image.recycle();
 
+
+
     }
 
     private void displaySelectedScreen(int id)
