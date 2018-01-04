@@ -1,8 +1,10 @@
 package fhu.unmpathway;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,13 +13,19 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,10 +37,12 @@ import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -46,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import static android.content.ContentValues.TAG;
 import static android.content.Context.PRINT_SERVICE;
 import static fhu.unmpathway.MainActivity.DRAW_HEIGHT;
 import static fhu.unmpathway.MainActivity.DRAW_WIDTH;
@@ -60,6 +71,8 @@ import static fhu.unmpathway.MainActivity.buildingsPath;
 import static fhu.unmpathway.MainActivity.eventGetX;
 import static fhu.unmpathway.MainActivity.eventGetY;
 import static fhu.unmpathway.MainActivity.focusRequired;
+import static fhu.unmpathway.MainActivity.lats;
+import static fhu.unmpathway.MainActivity.lons;
 import static fhu.unmpathway.MainActivity.nodeArray;
 import static fhu.unmpathway.MainActivity.topLeftLat;
 import static fhu.unmpathway.MainActivity.topLeftLon;
@@ -114,6 +127,12 @@ public class MapFrag extends Fragment
     ArrayList<Node> finalPath = new ArrayList<>();
 
     WebView web;
+
+    LocationListener locationListener;
+
+    static final int REQUEST_LOCATION = 1;
+    LocationManager locationManager;
+
 
     @Nullable
     @Override
@@ -212,9 +231,9 @@ public class MapFrag extends Fragment
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState)
             {
-
-                if (newState == SlidingUpPanelLayout.PanelState.EXPANDED && previousState == SlidingUpPanelLayout.PanelState.COLLAPSED)
+                if (newState == SlidingUpPanelLayout.PanelState.EXPANDED)
                 {
+
                     if (searchMode != REGULAR_SEARCH)
                     {
                         searchMode = REGULAR_SEARCH;
@@ -341,11 +360,29 @@ public class MapFrag extends Fragment
                 });
             }
         });
-        buildingTitle = (TextView) getView().findViewById(R.id.building_title);
+        buildingTitle = getView().findViewById(R.id.building_title);
         currentLocationAsStarting = getView().findViewById(R.id.current_location_as_start);
         currentLocationAsStarting.setVisibility(View.GONE);
+        currentLocationAsStarting.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                getLocation();
+            }
+        });
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new MyLocationListener();
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED)
+        {
 
-        FloatingActionButton fab = (FloatingActionButton) getView().findViewById(R.id.fab);
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+
+        FloatingActionButton fab = getView().findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -738,6 +775,65 @@ public class MapFrag extends Fragment
         });
     }
 
+
+    void getLocation()
+    {
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+        }
+        else
+        {
+//            Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (location != null)
+            {
+                double latti = location.getLatitude();
+                double longi = location.getLongitude();
+                int[] gps = convertCoordsToPixels(latti, longi);
+                System.out.println(gps[1]);
+                System.out.println(gps[0]);
+                if (gps[0] > -1 && gps[0] < bitmap.getWidth() && gps[1] > -1 && gps[1] < bitmap.getHeight())
+                {
+                    fromText.setText("Current Location (@"+latti+", "+longi);
+                    sX = gps[1];
+                    sY = gps[0];
+
+                    searchMode = REGULAR_SEARCH;
+                    sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                    searchView.setQuery("", false);
+                    searchView.setIconified(true);
+                    currentLocationAsStarting.setVisibility(View.GONE);
+                }
+                else
+                {
+                    Snackbar.make(getView(), "Current location is not on UNM central campus", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            }
+            else
+            {
+                System.out.println("unable to get location");
+            }
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode)
+        {
+            case REQUEST_LOCATION:
+                getLocation();
+                break;
+        }
+    }
 
     private void path()
     {
@@ -1134,5 +1230,49 @@ public class MapFrag extends Fragment
 
         });
     }
+
+    private int[] convertCoordsToPixels(double lat, double lon)
+    {
+        double pixelDistanceX = botRightX - topLeftX;
+        double pixelDistanceY = botRightY - topLeftY;
+        double lonDistance = Math.abs(botRightLon - topLeftLon);
+        double latDistance = Math.abs(botRightLat - topLeftLat);
+        double lonPer = (lon - topLeftLon) / lonDistance;
+        double latPer = (topLeftLat - lat) / latDistance;
+        int[] values = {(int) ((latPer * pixelDistanceY) + topLeftY), (int) ((lonPer * pixelDistanceX) + topLeftX)};
+//        buildingPixelsX.add((int) ((lonPer * pixelDistanceX) + topLeftX));
+//        buildingPixelsY.add((int) ((latPer * pixelDistanceY) + topLeftY));
+        return values;
+    }
+
+    private class MyLocationListener implements LocationListener
+    {
+
+        @Override
+        public void onLocationChanged(Location loc)
+        {
+            Toast.makeText(getActivity(), "Location changed: Lat: " + loc.getLatitude() + " Lng: " + loc.getLongitude(), Toast.LENGTH_SHORT).show();
+            String longitude = "Longitude: " + loc.getLongitude();
+            Log.v(TAG, longitude);
+            String latitude = "Latitude: " + loc.getLatitude();
+            Log.v(TAG, latitude);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider)
+        {
+        }
+
+        @Override
+        public void onProviderEnabled(String provider)
+        {
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras)
+        {
+        }
+    }
+
 
 }

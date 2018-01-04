@@ -2,6 +2,7 @@ package fhu.unmpathway;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -12,73 +13,55 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SearchView;
+
+
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SchedulesActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+import static fhu.unmpathway.MainActivity.buildings;
 
-    ListView schedules;
+public class SchedulesActivity extends AppCompatActivity
+{
     ListView location;
 
     String[] ListElements = new String[]{
             "Android",
             "PHP"
     };
+    SearchView searchView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedules);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        Intent intent = getIntent();
+
+        int position = intent.getIntExtra("entry", 0);
+        System.out.println(position);
 
         //I changed these to global variables just so you wouldnt have to re-declare them inside the FAB listener
-        schedules = (ListView) findViewById(R.id.schedulesListView);
 
         location = (ListView) findViewById(R.id.location);
 
+//x
 
-        //I totally forgot that you have to use some adapters to add things to listviews
-        final List<String> ListElementsArrayList = new ArrayList<String>(Arrays.asList(ListElements));
-
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>
-                (getApplicationContext(), android.R.layout.simple_list_item_1, ListElementsArrayList);
-
-        schedules.setAdapter(adapter);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //display schedules
-
-                //Add new schedule
-                ListElementsArrayList.add("New schedule");
-                adapter.notifyDataSetChanged();
-
-                //Maybe have an EditText pop up, prompting the user to give their schedule a name
-                //Or just call it "Schedule X"
-
-
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+//        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+//        navigationView.setNavigationItemSelectedListener(this);
 
 
         //Now you want to add some kind of listener to when an entry in the schedules list view is selected
@@ -91,14 +74,24 @@ public class SchedulesActivity extends AppCompatActivity
     }
 
     @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
+
+//    @Override
+//    public void onBackPressed()
+//    {
+//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        if (drawer.isDrawerOpen(GravityCompat.START))
+//        {
+//            drawer.closeDrawer(GravityCompat.START);
+//        }
+//        else
+//        {
+//            super.onBackPressed();
+//        }
+//    }
 
 //    @Override
 //    public boolean onCreateOptionsMenu(Menu menu)
@@ -133,23 +126,23 @@ public class SchedulesActivity extends AppCompatActivity
 //        return super.onOptionsItemSelected(item);
 //    }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.standard) {
-            finish();
-        } else if (id == R.id.elevation) {
-            finish();
-        } else if (id == R.id.schedules) {
-
-        }
-
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
+//    @SuppressWarnings("StatementWithEmptyBody")
+//    @Override
+//    public boolean onNavigationItemSelected(MenuItem item) {
+//        // Handle navigation view item clicks here.
+//        int id = item.getItemId();
+//
+//        if (id == R.id.standard) {
+//            finish();
+//        } else if (id == R.id.elevation) {
+//            finish();
+//        } else if (id == R.id.schedules) {
+//
+//        }
+//
+//
+//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        drawer.closeDrawer(GravityCompat.START);
+//        return true;
+//    }
 }
