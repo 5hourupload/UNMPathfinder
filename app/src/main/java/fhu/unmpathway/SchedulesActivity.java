@@ -56,8 +56,6 @@ public class SchedulesActivity extends AppCompatActivity
 
         location = (ListView) findViewById(R.id.location);
 
-//x
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 //        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);

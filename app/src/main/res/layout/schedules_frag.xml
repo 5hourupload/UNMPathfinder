@@ -5,12 +5,14 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/main_schedules_layout">
 
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/schedulesListView">
+            android:id="@+id/schedulesListView"
+            android:layout_margin="16dp">
 
 
 
@@ -19,10 +21,10 @@
         <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:id="@+id/add_schedule"
+            android:layout_margin="16dp"
             />
 
 
