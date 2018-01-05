@@ -31,7 +31,8 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:layout_gravity="bottom|end"
-                android:layout_margin="@dimen/fab_margin" />
+                android:layout_margin="@dimen/fab_margin"
+                android:src="@drawable/directions"/>
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/fab2"
@@ -39,7 +40,8 @@
                 android:layout_height="wrap_content"
                 android:layout_above="@id/fab"
                 android:layout_alignParentRight="true"
-                android:layout_marginRight="@dimen/fab_margin" />
+                android:layout_marginRight="@dimen/fab_margin"
+                android:src="@drawable/schedules"/>
 
         </RelativeLayout>
 

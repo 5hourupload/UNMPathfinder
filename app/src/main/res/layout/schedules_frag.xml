@@ -25,6 +25,7 @@
             android:layout_alignParentRight="true"
             android:id="@+id/add_schedule"
             android:layout_margin="16dp"
+            android:src="@drawable/plus"
             />
 
 

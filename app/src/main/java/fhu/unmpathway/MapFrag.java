@@ -153,7 +153,6 @@ public class MapFrag extends Fragment
     {
         super.onAttach(activity);
         mActivity = activity;
-        System.out.println("attached");
     }
 
     @Nullable
@@ -210,7 +209,6 @@ public class MapFrag extends Fragment
                     searchView.setIconified(true);
                     sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                     currentLocationAsStarting.setVisibility(View.GONE);
-                    System.out.println(206);
                     searchMode = REGULAR_SEARCH;
                     startingPoint = selectedItem;
                     for (int i = 0; i < buildings.size(); i++)
@@ -229,7 +227,6 @@ public class MapFrag extends Fragment
                     searchView.setQuery("", false);
                     searchView.setIconified(true);
                     sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-                    System.out.println(225);
                     searchMode = REGULAR_SEARCH;
                     for (int i = 0; i < buildings.size(); i++)
                     {
@@ -260,7 +257,6 @@ public class MapFrag extends Fragment
 //
 //                    if (searchMode != REGULAR_SEARCH)
 //                    {
-//                        System.out.println(256);
 //                        searchMode = REGULAR_SEARCH;
 //                        currentLocationAsStarting.setVisibility(View.GONE);
 //                        searchView.setQuery("", false);
@@ -365,7 +361,6 @@ public class MapFrag extends Fragment
             public void onClick(View view)
             {
                 sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-                System.out.println(361);
                 searchMode = REGULAR_SEARCH;
                 currentLocationAsStarting.setVisibility(View.GONE);
                 searchView.setQuery("", false);
@@ -613,10 +608,6 @@ public class MapFrag extends Fragment
         }
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.RGB_565;
-        System.out.println(left);
-        System.out.println(top);
-        System.out.println(right);
-        System.out.println(down);
         bitmap1 = bitmapRegionDecoder.decodeRegion(new Rect(left, top, right, down), options);
         bitmap1 = convertToMutable(mActivity, bitmap1);
     }
@@ -806,7 +797,6 @@ public class MapFrag extends Fragment
                     sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                     searchView.setQuery("", false);
                     searchView.setIconified(true);
-                    System.out.println(736);
                     searchMode = REGULAR_SEARCH;
                     currentLocationAsStarting.setVisibility(View.GONE);
                 }
@@ -991,7 +981,6 @@ public class MapFrag extends Fragment
                     fromText.setText("Current Location (@" + latti + ", " + longi);
                     sX = gps[1];
                     sY = gps[0];
-                    System.out.println(917);
                     searchMode = REGULAR_SEARCH;
                     sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                     searchView.setQuery("", false);
