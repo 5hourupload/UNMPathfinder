@@ -120,14 +120,14 @@
                     android:id="@+id/current_location_as_start"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="5"
                     android:text="Current_location" />
 
                 <Button
                     android:id="@+id/cancel_directions"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:text="close"
                     android:background="#00000000"
                     android:textColor="#808080"/>
