@@ -2,8 +2,10 @@ package fhu.unmpathway;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -11,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.location.Location;
@@ -88,6 +91,7 @@ public class MapFrag extends Fragment
     float screenWidth;
     float screenHeight;
     Bitmap bitmap;
+    Bitmap bitmap1;
     ListView searchListView;
     ArrayList<String> searchArray;
     ArrayAdapter<String> adapter;
@@ -133,6 +137,24 @@ public class MapFrag extends Fragment
     static final int REQUEST_LOCATION = 1;
     LocationManager locationManager;
 
+    SharedPreferences sharedPreferences;
+    ArrayList<Integer> buildingNumbers = new ArrayList<>();
+
+    boolean showingSchedule = false;
+    Activity mActivity;
+
+    int left = 9999;
+    int top = 9999;
+    int right = 0;
+    int down = 0;
+
+    @Override
+    public void onAttach(Activity activity)
+    {
+        super.onAttach(activity);
+        mActivity = activity;
+        System.out.println("attached");
+    }
 
     @Nullable
     @Override
@@ -153,7 +175,7 @@ public class MapFrag extends Fragment
         screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
         resetBitmap();
-        img = new TouchImageView(getView().getContext());
+        img = new TouchImageView(mActivity);
         img.setImageBitmap(bitmap);
         mainLayout.addView(img);
 
@@ -161,12 +183,13 @@ public class MapFrag extends Fragment
 
         sliding = getView().findViewById(R.id.sliding_layout);
         sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-        sliding.setDragView(R.id.building_collapse);
+//        sliding.setDragView(R.id.building_collapse);
+        sliding.setTouchEnabled(false);
 
-        searchListView = new ListView(getView().getContext());
+        searchListView = new ListView(mActivity);
         searchListView.setBackgroundColor(Color.WHITE);
         searchArray = new ArrayList<>();
-        adapter = new ArrayAdapter<>(getView().getContext(), android.R.layout.simple_list_item_1, searchArray);
+        adapter = new ArrayAdapter<>(mActivity, android.R.layout.simple_list_item_1, searchArray);
         searchListView.setAdapter(adapter);
         mainLayout.addView(searchListView);
         searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
@@ -187,6 +210,7 @@ public class MapFrag extends Fragment
                     searchView.setIconified(true);
                     sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                     currentLocationAsStarting.setVisibility(View.GONE);
+                    System.out.println(206);
                     searchMode = REGULAR_SEARCH;
                     startingPoint = selectedItem;
                     for (int i = 0; i < buildings.size(); i++)
@@ -205,7 +229,7 @@ public class MapFrag extends Fragment
                     searchView.setQuery("", false);
                     searchView.setIconified(true);
                     sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-
+                    System.out.println(225);
                     searchMode = REGULAR_SEARCH;
                     for (int i = 0; i < buildings.size(); i++)
                     {
@@ -231,17 +255,18 @@ public class MapFrag extends Fragment
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState)
             {
-                if (newState == SlidingUpPanelLayout.PanelState.EXPANDED)
-                {
-
-                    if (searchMode != REGULAR_SEARCH)
-                    {
-                        searchMode = REGULAR_SEARCH;
-                        currentLocationAsStarting.setVisibility(View.GONE);
-                        searchView.setQuery("", false);
-                        searchView.setIconified(true);
-                    }
-                }
+//                if (newState == SlidingUpPanelLayout.PanelState.EXPANDED)
+//                {
+//
+//                    if (searchMode != REGULAR_SEARCH)
+//                    {
+//                        System.out.println(256);
+//                        searchMode = REGULAR_SEARCH;
+//                        currentLocationAsStarting.setVisibility(View.GONE);
+//                        searchView.setQuery("", false);
+//                        searchView.setIconified(true);
+//                    }
+//                }
             }
 
         });
@@ -320,8 +345,8 @@ public class MapFrag extends Fragment
                 sX = -1;
                 sY = -1;
 
-                resetBitmap();
-                getActivity().runOnUiThread(new Runnable()
+                patchBitmap();
+                mActivity.runOnUiThread(new Runnable()
                 {
                     @Override
                     public void run()
@@ -340,16 +365,17 @@ public class MapFrag extends Fragment
             public void onClick(View view)
             {
                 sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+                System.out.println(361);
                 searchMode = REGULAR_SEARCH;
                 currentLocationAsStarting.setVisibility(View.GONE);
                 searchView.setQuery("", false);
                 searchView.setIconified(true);
                 if (displayingPath)
                 {
-                    resetBitmap();
+                    patchBitmap();
                     displayingPath = false;
                 }
-                getActivity().runOnUiThread(new Runnable()
+                mActivity.runOnUiThread(new Runnable()
                 {
                     @Override
                     public void run()
@@ -361,6 +387,21 @@ public class MapFrag extends Fragment
             }
         });
         buildingTitle = getView().findViewById(R.id.building_title);
+        buildingTitle.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                if (sliding.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
+                {
+                    sliding.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                }
+                else if (sliding.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED)
+                {
+                    sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                }
+            }
+        });
         currentLocationAsStarting = getView().findViewById(R.id.current_location_as_start);
         currentLocationAsStarting.setVisibility(View.GONE);
         currentLocationAsStarting.setOnClickListener(new View.OnClickListener()
@@ -371,14 +412,14 @@ public class MapFrag extends Fragment
                 getLocation();
             }
         });
-        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        locationManager = (LocationManager) mActivity.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener();
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
         {
 
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+            ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
 
@@ -396,8 +437,8 @@ public class MapFrag extends Fragment
 
                 if (currentlyFocused)
                 {
-                    resetBitmap();
-                    getActivity().runOnUiThread(new Runnable()
+                    patchBitmap();
+                    mActivity.runOnUiThread(new Runnable()
                     {
                         @Override
                         public void run()
@@ -409,14 +450,134 @@ public class MapFrag extends Fragment
                 }
             }
         });
+        FloatingActionButton fab2 = getView().findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+
+                if (showingSchedule)
+                {
+                    patchBitmap();
+                    mActivity.runOnUiThread(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            img.setImageBitmap(bitmap);
+                        }
+                    });
+                    showingSchedule = false;
+                }
+                else
+                {
+                    sharedPreferences = mActivity.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
+                    loadArray();
+                    for (int i = 0; i < buildingNumbers.size() - 1; i++)
+                    {
+                        int sX = buildingPixelsX.get(buildingNumbers.get(i));
+                        int sY = buildingPixelsY.get(buildingNumbers.get(i));
+                        int eX = buildingPixelsX.get(buildingNumbers.get(i + 1));
+                        int eY = buildingPixelsY.get(buildingNumbers.get(i + 1));
+
+                        if (sX == eX && sY == eY) continue;
+                        if (Math.abs(sX - eX) < 10 && Math.abs(sY - eY) < 10) continue;
+                        findPath(sX / 2, sY / 2, eX / 2, eY / 2);
+                        drawPath();
+                        mActivity.runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                Canvas canvas = new Canvas(bitmap);
+                                Paint paint = new Paint();
+                                paint.setColor(Color.BLUE);
+                                canvas.drawOval(xStart * 2 - 10, yStart * 2 - 10, xStart * 2 + 10, yStart * 2 + 10, paint);
+                                paint.setAlpha(128);
+                                canvas.drawOval(xStart * 2 - 15, yStart * 2 - 15, xStart * 2 + 15, yStart * 2 + 15, paint);
+                                paint.setColor(Color.BLUE);
+                                paint.setAlpha(255);
+                                canvas.drawOval(xDestination * 2 - 10, yDestination * 2 - 10, xDestination * 2 + 10, yDestination * 2 + 10, paint);
+                                paint.setAlpha(128);
+                                canvas.drawOval(xDestination * 2 - 15, yDestination * 2 - 15, xDestination * 2 + 15, yDestination * 2 + 15, paint);
+
+                                img.setImageBitmap(bitmap);
+
+                                left = Math.min(xStart * 2 - 15, left);
+                                top = Math.min(yStart * 2 - 15, top);
+                                right = Math.max(xStart * 2 + 15, right);
+                                down = Math.max(yStart * 2 + 15, down);
+                                left = Math.min(xDestination * 2 - 15, left);
+                                top = Math.min(yDestination * 2 - 15, top);
+                                right = Math.max(xDestination * 2 + 15, right);
+                                down = Math.max(yDestination * 2 + 15, down);
+
+                            }
+
+                        });
+                    }
+                    showingSchedule = true;
+
+                }
+            }
+        });
 
         web = getView().findViewById(R.id.webview_content);
         web.getSettings().setJavaScriptEnabled(true);
+
+        Button closeInfo = getView().findViewById(R.id.close_info);
+        closeInfo.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                sliding.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+                patchBitmap();
+                mActivity.runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        img.setImageBitmap(bitmap);
+                    }
+                });
+                currentlyFocused = false;
+            }
+        });
+    }
+
+    public void patchBitmap()
+    {
+//        Bitmap bmOverlay = Bitmap.createBitmap(bmp1.getWidth(), bmp1.getHeight(), bmp1.getConfig());
+        Canvas canvas = new Canvas(bitmap);
+//        canvas.drawBitmap(bitmap, new Matrix(), null);
+        getBitmapSection();
+        canvas.drawBitmap(bitmap1, left, top, null);
+        left = 9999;
+        top = 9999;
+        right = 0;
+        down = 0;
+        showingSchedule = false;
+        return;
+    }
+
+    public void loadArray()
+    {
+        buildingNumbers.clear();
+        int size = sharedPreferences.getInt("Status_size", 0);
+
+        for (int i = 0; i < size; i++)
+        {
+            buildingNumbers.add(sharedPreferences.getInt("Status_" + i, -1));
+        }
+
+
     }
 
     private void resetBitmap()
     {
-        InputStream inputStream = getResources().openRawResource(+R.drawable.map50_cropped_main);
+        InputStream inputStream = mActivity.getResources().openRawResource(+R.drawable.map50_cropped_main);
         BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
         tmpOptions.inJustDecodeBounds = true;
         BitmapFactory.decodeStream(inputStream, null, tmpOptions);
@@ -433,7 +594,31 @@ public class MapFrag extends Fragment
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.RGB_565;
         bitmap = bitmapRegionDecoder.decodeRegion(new Rect(0, 0, width, height), options);
-        bitmap = convertToMutable(getView().getContext(), bitmap);
+        bitmap = convertToMutable(mActivity, bitmap);
+    }
+
+    private void getBitmapSection()
+    {
+        InputStream inputStream = mActivity.getResources().openRawResource(+R.drawable.map50_cropped_main);
+        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
+        tmpOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(inputStream, null, tmpOptions);
+        BitmapRegionDecoder bitmapRegionDecoder = null;
+        try
+        {
+            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(inputStream, false);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        System.out.println(left);
+        System.out.println(top);
+        System.out.println(right);
+        System.out.println(down);
+        bitmap1 = bitmapRegionDecoder.decodeRegion(new Rect(left, top, right, down), options);
+        bitmap1 = convertToMutable(mActivity, bitmap1);
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -497,8 +682,8 @@ public class MapFrag extends Fragment
         {
             if (currentlyFocused)
             {
-                resetBitmap();
-                getActivity().runOnUiThread(new Runnable()
+                patchBitmap();
+                mActivity.runOnUiThread(new Runnable()
                 {
                     @Override
                     public void run()
@@ -537,11 +722,13 @@ public class MapFrag extends Fragment
             final String building = buildings.get(index);
             highlightBuilding(x, y);
             updateWebView(building);
-            getActivity().runOnUiThread(new Runnable()
+            mActivity.runOnUiThread(new Runnable()
             {
                 @Override
                 public void run()
                 {
+                    img.fixTrans();
+
                     sliding.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                     buildingTitle.setText(building);
                     buildingsCollapse.setVisibility(View.VISIBLE);
@@ -602,7 +789,7 @@ public class MapFrag extends Fragment
                 eX = (int) x;
                 eY = (int) y;
             }
-            getActivity().runOnUiThread(new Runnable()
+            mActivity.runOnUiThread(new Runnable()
             {
                 @Override
                 public void run()
@@ -619,6 +806,7 @@ public class MapFrag extends Fragment
                     sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                     searchView.setQuery("", false);
                     searchView.setIconified(true);
+                    System.out.println(736);
                     searchMode = REGULAR_SEARCH;
                     currentLocationAsStarting.setVisibility(View.GONE);
                 }
@@ -632,7 +820,7 @@ public class MapFrag extends Fragment
         final float y0 = y;
 
 
-        getActivity().runOnUiThread(new Runnable()
+        mActivity.runOnUiThread(new Runnable()
         {
             @Override
             public void run()
@@ -644,6 +832,10 @@ public class MapFrag extends Fragment
                 paint.setAlpha(128);
                 canvas.drawOval(x0 - 15, y0 - 15, x0 + 15, y0 + 15, paint);
 
+                left = Math.min((int) x0 - 15, left);
+                top = Math.min((int) y0 - 15,top);
+                right = Math.max((int) x0 + 15, right);
+                down = Math.max((int) y0 + 15, down);
                 img.setImageBitmap(bitmap);
             }
 
@@ -664,7 +856,7 @@ public class MapFrag extends Fragment
         if (currentlyFocused || displayingPath)
         {
             displayingPath = false;
-            resetBitmap();
+            patchBitmap();
         }
         currentlyFocused = true;
 
@@ -690,7 +882,7 @@ public class MapFrag extends Fragment
         img.setImageMatrix(img.matrix);
 //        img.invalidate();
 
-        getActivity().runOnUiThread(new Runnable()
+        mActivity.runOnUiThread(new Runnable()
         {
             @Override
             public void run()
@@ -711,7 +903,7 @@ public class MapFrag extends Fragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
-        getActivity().getMenuInflater().inflate(R.menu.main, menu);
+        mActivity.getMenuInflater().inflate(R.menu.main, menu);
 
         MenuItem item = menu.findItem(R.id.menu_search);
         searchView = (android.support.v7.widget.SearchView) item.getActionView();
@@ -765,7 +957,7 @@ public class MapFrag extends Fragment
         }
         urlString = urlString + "&gsc.sort=";
         final String finalUrl = urlString;
-        getActivity().runOnUiThread(new Runnable()
+        mActivity.runOnUiThread(new Runnable()
         {
             @Override
             public void run()
@@ -778,12 +970,12 @@ public class MapFrag extends Fragment
 
     void getLocation()
     {
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
         {
 
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+            ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
         }
         else
         {
@@ -794,14 +986,12 @@ public class MapFrag extends Fragment
                 double latti = location.getLatitude();
                 double longi = location.getLongitude();
                 int[] gps = convertCoordsToPixels(latti, longi);
-                System.out.println(gps[1]);
-                System.out.println(gps[0]);
                 if (gps[0] > -1 && gps[0] < bitmap.getWidth() && gps[1] > -1 && gps[1] < bitmap.getHeight())
                 {
-                    fromText.setText("Current Location (@"+latti+", "+longi);
+                    fromText.setText("Current Location (@" + latti + ", " + longi);
                     sX = gps[1];
                     sY = gps[0];
-
+                    System.out.println(917);
                     searchMode = REGULAR_SEARCH;
                     sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                     searchView.setQuery("", false);
@@ -816,7 +1006,8 @@ public class MapFrag extends Fragment
             }
             else
             {
-                System.out.println("unable to get location");
+                Snackbar.make(getView(), "Unable to retrieve location", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         }
 
@@ -841,7 +1032,7 @@ public class MapFrag extends Fragment
 //        image = BitmapFactory.decodeResource(getView().getContext().getResources(), R.drawable.map25_cropped_main);
 
 
-        if (displayingPath) resetBitmap();
+        if (displayingPath) patchBitmap();
         findPath(sX / 2, sY / 2, eX / 2, eY / 2);
         drawPath();
         drawStart();
@@ -860,9 +1051,6 @@ public class MapFrag extends Fragment
         yDestination = y1;
         xStart = x0;
         yStart = y0;
-        System.out.println(x0);
-        System.out.println(y0);
-
         if (buildingsPath[x0][y0])
         {
             int[] values = shift(x0, y0, x1, y1);
@@ -1118,7 +1306,7 @@ public class MapFrag extends Fragment
 //        gtx.fillOval(xStart - 5, yStart - 5, 10, 10);
 //        gtx.setFill(Color.BLUE);
 //        gtx.fillOval(xDestination - 5, yDestination - 5, 10, 10);
-        getActivity().runOnUiThread(new Runnable()
+        mActivity.runOnUiThread(new Runnable()
         {
             @Override
             public void run()
@@ -1136,6 +1324,14 @@ public class MapFrag extends Fragment
                 canvas.drawOval(xDestination * 2 - 15, yDestination * 2 - 15, xDestination * 2 + 15, yDestination * 2 + 15, paint);
 
                 img.setImageBitmap(bitmap);
+                left = Math.min(xStart * 2 - 15, left);
+                top = Math.min(yStart * 2 - 15, top);
+                right = Math.max(xStart * 2 + 15, right);
+                down = Math.max(yStart * 2 + 15, down);
+                left = Math.min(xDestination * 2 - 15, left);
+                top = Math.min(yDestination * 2 - 15, top);
+                right = Math.max(xDestination * 2 + 15, right);
+                down = Math.max(yDestination * 2 + 15, down);
             }
 
         });
@@ -1209,7 +1405,7 @@ public class MapFrag extends Fragment
 
     private void drawPath()
     {
-        getActivity().runOnUiThread(new Runnable()
+        mActivity.runOnUiThread(new Runnable()
         {
             @Override
             public void run()
@@ -1223,6 +1419,10 @@ public class MapFrag extends Fragment
                     paint.setColor(Color.RED);
                     canvas.drawOval(x * 2 - 3, y * 2 - 3, x * 2 + 3, y * 2 + 3, paint);
 
+                    left = Math.min(x * 2 - 3, left);
+                    top = Math.min(y * 2 - 3, top);
+                    right = Math.max(x * 2 + 3, right);
+                    down = Math.max(y * 2 + 3, down);
                 }
 
                 img.setImageBitmap(bitmap);
@@ -1251,11 +1451,11 @@ public class MapFrag extends Fragment
         @Override
         public void onLocationChanged(Location loc)
         {
-            Toast.makeText(getActivity(), "Location changed: Lat: " + loc.getLatitude() + " Lng: " + loc.getLongitude(), Toast.LENGTH_SHORT).show();
-            String longitude = "Longitude: " + loc.getLongitude();
-            Log.v(TAG, longitude);
-            String latitude = "Latitude: " + loc.getLatitude();
-            Log.v(TAG, latitude);
+//            Toast.makeText(mActivity, "Location changed: Lat: " + loc.getLatitude() + " Lng: " + loc.getLongitude(), Toast.LENGTH_SHORT).show();
+//            String longitude = "Longitude: " + loc.getLongitude();
+//            Log.v(TAG, longitude);
+//            String latitude = "Latitude: " + loc.getLatitude();
+//            Log.v(TAG, latitude);
         }
 
         @Override

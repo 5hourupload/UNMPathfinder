@@ -9,10 +9,6 @@
 			android:icon="@drawable/ic_menu_camera"
 			android:title="Standard Navigation"/>
 		<item
-			android:id="@+id/elevation"
-			android:icon="@drawable/ic_menu_gallery"
-			android:title="Elevation Map"/>
-		<item
 			android:id="@+id/schedules"
 			android:icon="@drawable/ic_menu_slideshow"
 			android:title="Schedules"/>

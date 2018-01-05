@@ -53,7 +53,14 @@ public class SchedulesFrag extends Fragment
     static CustomAdapter1 adapter;
     static ArrayAdapter<String> searchAdapter;
     android.support.v7.widget.SearchView searchView;
-    SharedPreferences sharedpreferences;
+    static SharedPreferences sharedpreferences;
+Activity mActivity;
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mActivity = activity;
+        System.out.println("attached");
+    }
 
 
     @Nullable
@@ -71,7 +78,9 @@ public class SchedulesFrag extends Fragment
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
 
-        sharedpreferences = getActivity().getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
+        buildingNumbers.clear();
+        arrayListString.clear();
+        sharedpreferences = mActivity.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
         loadArray();
 
         schedules = getView().findViewById(R.id.schedulesListView);
@@ -79,7 +88,7 @@ public class SchedulesFrag extends Fragment
         {
             arrayListString.add(buildings.get(buildingNumbers.get(i)));
         }
-        adapter = new CustomAdapter1(getView().getContext(), arrayListString);
+        adapter = new CustomAdapter1(mActivity, arrayListString);
         schedules.setAdapter(adapter);
 
         FloatingActionButton fab = getView().findViewById(R.id.add_schedule);
@@ -92,20 +101,11 @@ public class SchedulesFrag extends Fragment
             }
         });
 
-        schedules.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l)
-            {
-
-            }
-        });
-
 
         searchListView = new ListView(getView().getContext());
         searchListView.setBackgroundColor(Color.WHITE);
         searchArray = new ArrayList<>();
-        searchAdapter = new ArrayAdapter<>(getView().getContext(), android.R.layout.simple_list_item_1, searchArray);
+        searchAdapter = new ArrayAdapter<>(mActivity, android.R.layout.simple_list_item_1, searchArray);
         searchListView.setAdapter(searchAdapter);
         RelativeLayout mainLayout = getView().findViewById(R.id.main_schedules_layout);
         mainLayout.addView(searchListView);
@@ -136,7 +136,7 @@ public class SchedulesFrag extends Fragment
 
     }
 
-    public boolean saveArray()
+    public static boolean saveArray()
     {
         SharedPreferences.Editor editor = sharedpreferences.edit();
 
@@ -167,6 +167,8 @@ public class SchedulesFrag extends Fragment
     {
         arrayListString.remove(position);
         adapter.notifyDataSetChanged();
+        buildingNumbers.remove(position);
+        saveArray();
 //        schedules.setAdapter(adapter);
     }
 
@@ -174,7 +176,7 @@ public class SchedulesFrag extends Fragment
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
         System.out.println(inflater);
-        getActivity().getMenuInflater().inflate(R.menu.main, menu);
+        mActivity.getMenuInflater().inflate(R.menu.main, menu);
 
         MenuItem item = menu.findItem(R.id.menu_search);
         searchView = (android.support.v7.widget.SearchView) item.getActionView();

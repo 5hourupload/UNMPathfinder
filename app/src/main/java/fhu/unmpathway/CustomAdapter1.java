@@ -73,19 +73,18 @@ public class CustomAdapter1 extends BaseAdapter
                 deleteRow(position);
             }
         });
-        final Button edit = customView.findViewById(R.id.edit_schedule);
-        edit.setOnClickListener(new OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-
-                Intent intent = new Intent(context,SchedulesActivity.class);
-                //based on item add info to intent
-                intent.putExtra("entry",position);
-                context.startActivity(intent);
-            }
-        });
+//        final Button edit = customView.findViewById(R.id.edit_schedule);
+//        edit.setOnClickListener(new OnClickListener()
+//        {
+//            @Override
+//            public void onClick(View view)
+//            {
+//
+//                Intent intent = new Intent(context,SchedulesActivity.class);
+//                intent.putExtra("entry",position);
+//                context.startActivity(intent);
+//            }
+//        });
         TextView title = customView.findViewById(R.id.schedule_title);
         title.setText(titles.get(position));
 

@@ -140,8 +140,6 @@ public class MainActivity extends AppCompatActivity
             case R.id.standard:
                 fragment = new MapFrag();
                 break;
-            case R.id.elevation:
-                break;
             case R.id.schedules:
                 fragment = new SchedulesFrag();
                 break;
