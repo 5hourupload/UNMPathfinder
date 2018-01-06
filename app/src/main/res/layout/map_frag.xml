@@ -115,7 +115,8 @@
                         android:layout_centerVertical="true"
                         android:text="Directions"
                         android:textColor="#000000"
-                        android:textSize="18sp" />
+                        android:textSize="18sp"
+                        android:id="@+id/directions_label"/>
                 </RelativeLayout>
 
                 <Button
@@ -123,7 +124,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="5"
-                    android:text="Current_location" />
+                    android:text="Current location" />
 
                 <Button
                     android:id="@+id/cancel_directions"

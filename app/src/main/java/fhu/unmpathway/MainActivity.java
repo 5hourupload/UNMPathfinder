@@ -96,6 +96,8 @@ public class MainActivity extends AppCompatActivity
     ArrayList<Integer> pixelsX = new ArrayList<>();
     ArrayList<Integer> pixelsY = new ArrayList<>();
 
+    static Bitmap bitmap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -129,9 +131,66 @@ public class MainActivity extends AppCompatActivity
         image.recycle();
 
 
+        resetBitmap();
+
+
 
     }
 
+
+    private void resetBitmap()
+    {
+        InputStream inputStream = getResources().openRawResource(+R.drawable.map50_cropped_main);
+        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
+        tmpOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(inputStream, null, tmpOptions);
+        int width = tmpOptions.outWidth;
+        int height = tmpOptions.outHeight;
+        BitmapRegionDecoder bitmapRegionDecoder = null;
+        try
+        {
+            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(inputStream, false);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        bitmap = bitmapRegionDecoder.decodeRegion(new Rect(0, 0, width, height), options);
+        bitmap = convertToMutable(this, bitmap);
+    }
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    public static Bitmap convertToMutable(final Context context, final Bitmap imgIn)
+    {
+        final int width = imgIn.getWidth(), height = imgIn.getHeight();
+        final Bitmap.Config type = imgIn.getConfig();
+        File outputFile = null;
+        final File outputDir = context.getCacheDir();
+        try
+        {
+            outputFile = File.createTempFile(Long.toString(System.currentTimeMillis()), null, outputDir);
+            outputFile.deleteOnExit();
+            final RandomAccessFile randomAccessFile = new RandomAccessFile(outputFile, "rw");
+            final FileChannel channel = randomAccessFile.getChannel();
+            final MappedByteBuffer map = channel.map(FileChannel.MapMode.READ_WRITE, 0, imgIn.getRowBytes() * height);
+            imgIn.copyPixelsToBuffer(map);
+            imgIn.recycle();
+            final Bitmap result = Bitmap.createBitmap(width, height, type);
+            map.position(0);
+            result.copyPixelsFromBuffer(map);
+            channel.close();
+            randomAccessFile.close();
+            outputFile.delete();
+            return result;
+        } catch (final Exception e)
+        {
+        } finally
+        {
+            if (outputFile != null)
+                outputFile.delete();
+        }
+        return null;
+    }
     private void displaySelectedScreen(int id)
     {
         Fragment fragment = null;

@@ -63,6 +63,7 @@ import static android.content.ContentValues.TAG;
 import static android.content.Context.PRINT_SERVICE;
 import static fhu.unmpathway.MainActivity.DRAW_HEIGHT;
 import static fhu.unmpathway.MainActivity.DRAW_WIDTH;
+import static fhu.unmpathway.MainActivity.bitmap;
 import static fhu.unmpathway.MainActivity.botRightLat;
 import static fhu.unmpathway.MainActivity.botRightLon;
 import static fhu.unmpathway.MainActivity.botRightX;
@@ -90,7 +91,7 @@ public class MapFrag extends Fragment
     boolean currentlyFocused = false;
     float screenWidth;
     float screenHeight;
-    Bitmap bitmap;
+//    Bitmap bitmap;
     Bitmap bitmap1;
     ListView searchListView;
     ArrayList<String> searchArray;
@@ -173,7 +174,6 @@ public class MapFrag extends Fragment
         RelativeLayout mainLayout = getView().findViewById(R.id.standard_layout);
         screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
-        resetBitmap();
         img = new TouchImageView(mActivity);
         img.setImageBitmap(bitmap);
         mainLayout.addView(img);
@@ -416,7 +416,6 @@ public class MapFrag extends Fragment
 
             ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
 
         FloatingActionButton fab = getView().findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener()
@@ -540,6 +539,24 @@ public class MapFrag extends Fragment
                 currentlyFocused = false;
             }
         });
+
+        TextView directionsLabel = getView().findViewById(R.id.directions_label);
+        directionsLabel.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                if (sliding.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
+                {
+                    sliding.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                }
+                else if (sliding.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED)
+                {
+                    sliding.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                }
+            }
+        });
+
     }
 
     public void patchBitmap()
@@ -570,27 +587,7 @@ public class MapFrag extends Fragment
 
     }
 
-    private void resetBitmap()
-    {
-        InputStream inputStream = mActivity.getResources().openRawResource(+R.drawable.map50_cropped_main);
-        BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
-        tmpOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(inputStream, null, tmpOptions);
-        int width = tmpOptions.outWidth;
-        int height = tmpOptions.outHeight;
-        BitmapRegionDecoder bitmapRegionDecoder = null;
-        try
-        {
-            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(inputStream, false);
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
-        bitmap = bitmapRegionDecoder.decodeRegion(new Rect(0, 0, width, height), options);
-        bitmap = convertToMutable(mActivity, bitmap);
-    }
+
 
     private void getBitmapSection()
     {
@@ -969,6 +966,8 @@ public class MapFrag extends Fragment
         }
         else
         {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+
 //            Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (location != null)
@@ -978,7 +977,7 @@ public class MapFrag extends Fragment
                 int[] gps = convertCoordsToPixels(latti, longi);
                 if (gps[0] > -1 && gps[0] < bitmap.getWidth() && gps[1] > -1 && gps[1] < bitmap.getHeight())
                 {
-                    fromText.setText("Current Location (@" + latti + ", " + longi);
+                    fromText.setText("Current Location @" + latti + ", " + longi);
                     sX = gps[1];
                     sY = gps[0];
                     searchMode = REGULAR_SEARCH;
