@@ -170,6 +170,8 @@ public class MapFrag extends Fragment
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
 
+        System.out.println(currentlyFocused);
+        System.out.println(left);
         //SET UP MAP
         RelativeLayout mainLayout = getView().findViewById(R.id.standard_layout);
         screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
